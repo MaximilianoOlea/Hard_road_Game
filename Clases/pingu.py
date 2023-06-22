@@ -76,6 +76,7 @@ class Pingu (pygame.sprite.Sprite):
                 if not self.is_jumping and self.is_in_floor:
                     self.is_jumping = True
                     self.is_in_floor = False
+
                     self.move(self.jump_power*-1,False)
 
             case "dispara":
@@ -184,12 +185,16 @@ class Pingu (pygame.sprite.Sprite):
         if not self.is_in_floor:
             self.rect_pies.y += self.movement_y
             self.rect.y += self.movement_y
-            self.is_falling = False
 
             if self.movement_y + self.gravity < self.limit_speed_fall:
-                self.is_falling = True
                 self.movement_y += self.gravity
                 self.rect_pies.y += self.gravity
+                if self.movement_y > 0:
+                    self.is_falling = True
+                else:
+                    self.is_falling = False
+        else:
+            self.is_falling = False
 
     def jump_draw(self):
         if self.is_jumping or not self.is_in_floor:
@@ -203,14 +208,17 @@ class Pingu (pygame.sprite.Sprite):
         if self.rect_pies.colliderect(floor_impact):
             if self.is_falling:
                 self.rect.bottom = floor_impact.top
-            self.movement_y = 0
-            self.is_jumping = False
-            self.is_in_floor = True
+                self.rect_pies.bottom = floor_impact.top
+                self.movement_y = 0
+                self.is_jumping = False
+                self.is_in_floor = True
         else:
+            self.bajar_plataforma = True
             self.is_in_floor = False
 
-        if self.bajar_plataforma and not self.rect_pies.colliderect(floor_impact):
-            self.bajar_plataforma = False
+
+        # if self.bajar_plataforma and not self.rect_pies.colliderect(floor_impact):
+        #     self.bajar_plataforma = False
 
         # else:
         #     self.is_in_floor = False

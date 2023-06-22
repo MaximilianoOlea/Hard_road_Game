@@ -13,6 +13,13 @@ from Configuraciones.charge_list_animations import *
 from .pingu import Pingu
 
 
+def bubble_sort_pisos(lista_pisos):
+    n = len(lista_pisos)
+    for i in range(n - 1):
+        for j in range(0, n - i - 1):
+            if lista_pisos[j].y < lista_pisos[j + 1].y:
+                lista_pisos[j], lista_pisos[j + 1] = lista_pisos[j + 1], lista_pisos[j]
+
 class Game:
     def __init__(self, size_screen: tuple, name_game: str,icon_path:str):
 
@@ -57,7 +64,9 @@ class Game:
         self.lista_pisos.append(self.piso4)
         self.lista_pisos.append(self.piso2)
         self.lista_pisos.append(self.piso3)
+        self.index_piso = 0
 
+        bubble_sort_pisos(self.lista_pisos)
 
 # Estados del juego
 
@@ -129,7 +138,7 @@ class Game:
                         self.pingu.bajar_plataforma = True
                         self.pingu.is_in_floor = False
 
-
+        
 
         if not self.pause:
             self.controller_movement()
@@ -156,20 +165,31 @@ class Game:
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
 
-        if not self.pingu.bajar_plataforma and not self.pingu.is_in_floor:
-            for piso in self.lista_pisos:
-                self.pingu.check_collision_floor(piso)
+        # for piso in self.lista_pisos:
+        #     if not self.pingu.is_in_floor:
+        #         self.pingu.check_collision_floor(piso)
+        #         print("----------------------------------------")
+        #         print ("Esta en el piso",self.pingu.is_in_floor)
+        #         print ("Bajar de plataforma",self.pingu.bajar_plataforma)
+        #         print ("Esta saltando",self.pingu.is_jumping)
+        #         print("----------------------------------------")
+        #     print("*****************************************")
+        #     print ("Esta en el piso",self.pingu.is_in_floor)
+        #     print ("Bajar de plataforma",self.pingu.bajar_plataforma)
+        #     print ("Esta saltando",self.pingu.is_jumping)
+        #     print("*****************************************")
 
-            # self.pingu.check_collision_floor(self.piso2)
 
-
+        for i in range(len(self.lista_pisos)):
+            if not self.pingu.is_in_floor:
+                self.pingu.check_collision_floor(self.lista_pisos[i])
 
         if get_mode():
             for lado in self.piso_sides:
                 pygame.draw.rect(self.screen,"Yellow",self.piso_sides[lado],3)
-            self.screen.fill("Orange",self.piso2)
-            self.screen.fill("Orange",self.piso3)
-            self.screen.fill("Orange",self.piso4)
+            self.screen.fill("Yellow",self.lista_pisos[0])
+            self.screen.fill("Red",self.lista_pisos[1])
+            self.screen.fill("Green",self.lista_pisos[2])
             self.screen.fill("Blue",self.pingu.rect_pies)
 
         pygame.display.flip()
@@ -203,7 +223,6 @@ class Game:
             self.pingu.is_looking = "derecha"
         elif keys[pygame.K_x] or keys[pygame.K_k]:
             self.pingu.is_doing = "salta"
-            self.pingu.bajar_plataforma = False
         elif keys[pygame.K_j] or keys[pygame.K_z]:
             self.pingu.is_doing = "dispara"              
         else:
