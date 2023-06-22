@@ -1,5 +1,4 @@
 import pygame
-import time
 from Configuraciones.charge_list_animations import *
 from tools import *
 from Configuraciones.config_assets import *
@@ -13,24 +12,26 @@ class Pingu (pygame.sprite.Sprite):
         self.animations = pingu_animations
         resize_image(self.animations,SIZE_MAIN_CHARACTER)
         self.index = 0
+        #Lo necesita cualquier elemento:
         self.image = self.animations[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = initial_position[0]
-        self.rect.y = initial_position[1]   
+        self.rect.y = initial_position[1]  
 
         #Movimiento: 
         self.speed = SPEED_MAIN_CHARACTER
-
         #Salto
         self.gravity = GRAVITY_MAIN_CHARACTER
         self.jump_power = JUMP_POWER_MAIN_CHARACTER
         self.limit_speed_fall = JUMP_POWER_MAIN_CHARACTER
         self.is_jumping = False
-        self.is_in_floor = True
+        self.is_in_floor = False
         self.movement_y = 0
 
         self.is_looking = "derecha" #Comienza mirando a la derecha
         self.is_doing = "quieto" #Comienza quieto
+
+        self.is_falling = False
 
         self.score = 0
         self.count_life = 1
@@ -41,8 +42,9 @@ class Pingu (pygame.sprite.Sprite):
 
         #Prueba
         self.bajar_plataforma = False
-        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],40,20)
+        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],30,10)
         self.rect_pies.bottom = self.rect.bottom
+
     def update(self):
         #Movimientos laterales
         match self.is_doing:
@@ -182,9 +184,13 @@ class Pingu (pygame.sprite.Sprite):
         if not self.is_in_floor:
             self.rect_pies.y += self.movement_y
             self.rect.y += self.movement_y
+            self.is_falling = False
+
             if self.movement_y + self.gravity < self.limit_speed_fall:
+                self.is_falling = True
                 self.movement_y += self.gravity
                 self.rect_pies.y += self.gravity
+
     def jump_draw(self):
         if self.is_jumping or not self.is_in_floor:
             if self.is_looking == "derecha":
@@ -192,15 +198,20 @@ class Pingu (pygame.sprite.Sprite):
             else: 
                 self.animate_motion(tupla_salta_izquierda)
 
-    def check_collision_floor(self,floor_impact:pygame.Rect,floor):
+    def check_collision_floor(self,floor_impact):
 
         if self.rect_pies.colliderect(floor_impact):
-            if self.is_jumping:
+            if self.is_falling:
                 self.rect.bottom = floor_impact.top
-                self.movement_y = 0
-                self.is_jumping = False
-                self.is_in_floor = True
-                self.bajar_plataforma = False
+            self.movement_y = 0
+            self.is_jumping = False
+            self.is_in_floor = True
         else:
             self.is_in_floor = False
-            self.is_jumping = True
+
+        if self.bajar_plataforma and not self.rect_pies.colliderect(floor_impact):
+            self.bajar_plataforma = False
+
+        # else:
+        #     self.is_in_floor = False
+        #     self.is_jumping = True

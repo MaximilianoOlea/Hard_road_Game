@@ -32,7 +32,7 @@ AMARILLO = pygame.color.Color(238, 253, 42)
 
 #Pingu (Personaje Principal)
 main_character_x = CENTER_X
-main_character_y = CENTER_Y-300
+main_character_y = 0
 
 SIZE_MAIN_CHARACTER= (50,80)
 SPEED_FALL_MAIN_CHARACTER = 8

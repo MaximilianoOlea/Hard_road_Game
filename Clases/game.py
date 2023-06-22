@@ -44,8 +44,19 @@ class Game:
         self.piso_sides = get_rectangles(self.piso)
 
         self.piso2 = pygame.Rect(600,0,500,20)
-        self.piso2.top = self.piso.top - 10
+        self.piso2.top = 500
 
+
+        self.piso3 =  pygame.Rect(600,0,500,20)
+        self.piso3.top = 300
+
+        self.piso4 = pygame.Rect(600,0,500,20)
+        self.piso4.top = 200
+
+        self.lista_pisos = []
+        self.lista_pisos.append(self.piso4)
+        self.lista_pisos.append(self.piso2)
+        self.lista_pisos.append(self.piso3)
 
 
 # Estados del juego
@@ -114,7 +125,11 @@ class Game:
                         self.pingu.is_doing = "dispara"              
                         print ("dispara")
                 elif evento.key == pygame.K_DOWN:
-                    self.pingu.bajar_plataforma = True
+                    if self.pingu.is_in_floor:
+                        self.pingu.bajar_plataforma = True
+                        self.pingu.is_in_floor = False
+
+
 
         if not self.pause:
             self.controller_movement()
@@ -140,8 +155,11 @@ class Game:
         #self.pingu.draw(self.screen)
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
-        if not self.pingu.bajar_plataforma:
-            self.pingu.check_collision_floor(self.piso2,self.piso)
+
+        if not self.pingu.bajar_plataforma and not self.pingu.is_in_floor:
+            for piso in self.lista_pisos:
+                self.pingu.check_collision_floor(piso)
+
             # self.pingu.check_collision_floor(self.piso2)
 
 
@@ -150,6 +168,8 @@ class Game:
             for lado in self.piso_sides:
                 pygame.draw.rect(self.screen,"Yellow",self.piso_sides[lado],3)
             self.screen.fill("Orange",self.piso2)
+            self.screen.fill("Orange",self.piso3)
+            self.screen.fill("Orange",self.piso4)
             self.screen.fill("Blue",self.pingu.rect_pies)
 
         pygame.display.flip()
@@ -183,6 +203,7 @@ class Game:
             self.pingu.is_looking = "derecha"
         elif keys[pygame.K_x] or keys[pygame.K_k]:
             self.pingu.is_doing = "salta"
+            self.pingu.bajar_plataforma = False
         elif keys[pygame.K_j] or keys[pygame.K_z]:
             self.pingu.is_doing = "dispara"              
         else:
