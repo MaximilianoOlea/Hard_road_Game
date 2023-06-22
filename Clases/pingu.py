@@ -90,7 +90,6 @@ class Pingu (pygame.sprite.Sprite):
         self.image = self.animations[self.index]
 
         self.jump()
-        self.jump_draw()
     # Restringir movimientos:
 
     def move(self, speed: int, lateral_movement: bool = True, right_movement: bool = True):  # OK
@@ -186,6 +185,7 @@ class Pingu (pygame.sprite.Sprite):
             self.rect_pies.y += self.movement_y
             self.rect.y += self.movement_y
 
+            # self.caer()
             if self.movement_y + self.gravity < self.limit_speed_fall:
                 self.movement_y += self.gravity
                 self.rect_pies.y += self.gravity
@@ -196,13 +196,21 @@ class Pingu (pygame.sprite.Sprite):
         else:
             self.is_falling = False
 
-    def jump_draw(self):
+        self.__jump_draw()
+
+    def __jump_draw(self):
         if self.is_jumping or not self.is_in_floor:
             if self.is_looking == "derecha":
                 self.animate_motion(tupla_salta_derecha)
             else: 
                 self.animate_motion(tupla_salta_izquierda)
 
+    def caer(self):
+        if self.is_falling:
+            self.movement_y += self.gravity 
+        if not self.is_jumping and not self.is_in_floor:
+            self.is_falling = True
+    
     def check_collision_floor(self,floor_impact):
 
         if self.rect_pies.colliderect(floor_impact):
@@ -212,14 +220,24 @@ class Pingu (pygame.sprite.Sprite):
                 self.movement_y = 0
                 self.is_jumping = False
                 self.is_in_floor = True
+                self.limit_speed_fall = floor_impact.top
+                print (self.limit_speed_fall)
         else:
             self.bajar_plataforma = True
-            self.is_in_floor = False
+            self.is_falling = True
 
 
-        # if self.bajar_plataforma and not self.rect_pies.colliderect(floor_impact):
-        #     self.bajar_plataforma = False
 
-        # else:
-        #     self.is_in_floor = False
-        #     self.is_jumping = True
+
+
+    # def verificar_colision_piso(self,piso):  
+        
+    #     if self.rect_pies.colliderect(piso):
+    #         self.is_falling = False
+    #         self.limit_speed_fall = piso.top
+    #     else:
+    #         self.is_falling = True
+
+    # def caida (self):
+    #     if self.is_falling :
+    #         if self.movement_y + self.gravity < self.limit_speed_fall:  

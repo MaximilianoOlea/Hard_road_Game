@@ -12,6 +12,7 @@ from Configuraciones.charge_list_animations import *
 
 from .pingu import Pingu
 
+from .platform import Platform
 
 def bubble_sort_pisos(lista_pisos):
     n = len(lista_pisos)
@@ -44,14 +45,15 @@ class Game:
         self.all_sprites = pygame.sprite.Group()
         self.pingu = Pingu((main_character_x,main_character_y))
         self.all_sprites.add(self.pingu)
+        self.sprite_platforms = pygame.sprite.Group()
 
         #Piso
         self.piso = pygame.Rect(600,0,500,20)
         self.piso.top = self.pingu.rect.bottom + 300
         self.piso_sides = get_rectangles(self.piso)
 
-        self.piso2 = pygame.Rect(600,0,500,20)
-        self.piso2.top = 500
+        self.piso2 = pygame.Rect(0,50,500,20)
+        #self.piso2.top = 500
 
 
         self.piso3 =  pygame.Rect(600,0,500,20)
@@ -66,7 +68,13 @@ class Game:
         self.lista_pisos.append(self.piso3)
         self.index_piso = 0
 
-        bubble_sort_pisos(self.lista_pisos)
+        self.create_list_platforms()
+# ------------------------------------------------------
+
+        # bubble_sort_pisos(self.lista_pisos)
+
+        # self.plataforma = Platform(rf"assets\items\platforms\earth.png",CENTER,SIZE_PLATFORM_MEDIUM)
+        # self.sprite_platforms = pygame.sprite.Group()
 
 # Estados del juego
 
@@ -180,17 +188,20 @@ class Game:
         #     print("*****************************************")
 
 
-        for i in range(len(self.lista_pisos)):
-            if not self.pingu.is_in_floor:
-                self.pingu.check_collision_floor(self.lista_pisos[i])
+        for platform in self.sprite_platforms:
+            self.pingu.check_collision_floor(platform.floor_collision)
+            # lista = pygame.sprite.spritecollide(self.pingu, self.sprite_platforms, False)
+        
+
+        # print(self.pingu.is_falling,"Esta cayendo")
+        # print (self.pingu.is_in_floor, "Esta en el piso")
+        # print (self.pingu.is_jumping, "Esta saltando")
 
         if get_mode():
-            for lado in self.piso_sides:
-                pygame.draw.rect(self.screen,"Yellow",self.piso_sides[lado],3)
-            self.screen.fill("Yellow",self.lista_pisos[0])
-            self.screen.fill("Red",self.lista_pisos[1])
-            self.screen.fill("Green",self.lista_pisos[2])
             self.screen.fill("Blue",self.pingu.rect_pies)
+
+            for platform in self.sprite_platforms:
+                self.screen.fill("Green",platform.floor_collision)
 
         pygame.display.flip()
 
@@ -226,4 +237,28 @@ class Game:
         elif keys[pygame.K_j] or keys[pygame.K_z]:
             self.pingu.is_doing = "dispara"              
         else:
-            self.pingu.is_doing = "quieto"      
+            self.pingu.is_doing = "quieto"     
+
+    def create_list_platforms(self):
+        #Level 1:
+        list_platform = []
+        #Base
+        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
+
+        #Primeros escalones
+        list_platform.append(self.create_platform((CENTER_X-200, HEIGHT-200), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
+
+        #MEDIO
+        list_platform.append(self.create_platform((CENTER_X-350, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
+
+
+        for platform in list_platform:
+            self.all_sprites.add(platform)
+            self.sprite_platforms.add(platform)
+    def create_platform(self,position:tuple,size:tuple):
+        platform = Platform(rf"assets\items\platforms\earth.png",position,size)
+        return platform
