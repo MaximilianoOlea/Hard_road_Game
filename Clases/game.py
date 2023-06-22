@@ -144,12 +144,13 @@ class Game:
             self.pingu.check_collision_floor(self.piso2,self.piso)
             # self.pingu.check_collision_floor(self.piso2)
 
-        self.screen.fill("Orange",self.piso2)
+
 
         if get_mode():
             for lado in self.piso_sides:
                 pygame.draw.rect(self.screen,"Yellow",self.piso_sides[lado],3)
-
+            self.screen.fill("Orange",self.piso2)
+            self.screen.fill("Blue",self.pingu.rect_pies)
 
         pygame.display.flip()
 

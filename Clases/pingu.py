@@ -29,7 +29,6 @@ class Pingu (pygame.sprite.Sprite):
         self.is_in_floor = True
         self.movement_y = 0
 
-
         self.is_looking = "derecha" #Comienza mirando a la derecha
         self.is_doing = "quieto" #Comienza quieto
 
@@ -42,7 +41,8 @@ class Pingu (pygame.sprite.Sprite):
 
         #Prueba
         self.bajar_plataforma = False
-
+        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],40,20)
+        self.rect_pies.bottom = self.rect.bottom
     def update(self):
         #Movimientos laterales
         match self.is_doing:
@@ -101,11 +101,15 @@ class Pingu (pygame.sprite.Sprite):
             if right_movement:
                 if not self.limit_moves(WIDTH,"derecha"):
                     self.rect.x += speed
+                    self.rect_pies.x += speed
             else:
                 if not self.limit_moves(0,"izquierda"):
                     self.rect.x += speed*-1
+                    self.rect_pies.x += speed*-1
+
         else:
             self.movement_y = speed
+
 
 
     def _limit_moves_right(self, limit_right):
@@ -176,10 +180,11 @@ class Pingu (pygame.sprite.Sprite):
 
     def jump(self):
         if not self.is_in_floor:
+            self.rect_pies.y += self.movement_y
             self.rect.y += self.movement_y
             if self.movement_y + self.gravity < self.limit_speed_fall:
                 self.movement_y += self.gravity
-
+                self.rect_pies.y += self.gravity
     def jump_draw(self):
         if self.is_jumping or not self.is_in_floor:
             if self.is_looking == "derecha":
@@ -189,14 +194,13 @@ class Pingu (pygame.sprite.Sprite):
 
     def check_collision_floor(self,floor_impact:pygame.Rect,floor):
 
-        if self.is_in_floor :
-            if self.rect.colliderect(floor_impact):
-                if self.is_jumping:
-                    self.rect.bottom = floor_impact.top
-                    self.movement_y = 0
-                    self.is_jumping = False
-                    self.is_in_floor = True
-                    self.bajar_plataforma = False
-            else:
-                self.is_in_floor = False
-                self.is_jumping = True
+        if self.rect_pies.colliderect(floor_impact):
+            if self.is_jumping:
+                self.rect.bottom = floor_impact.top
+                self.movement_y = 0
+                self.is_jumping = False
+                self.is_in_floor = True
+                self.bajar_plataforma = False
+        else:
+            self.is_in_floor = False
+            self.is_jumping = True
