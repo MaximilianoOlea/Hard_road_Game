@@ -24,13 +24,13 @@ diccionario_movimientos = {
 # diccionario_animaciones_pingu["dispara"] = pingu_shooting
 # diccionario_animaciones_pingu["dispara_izquierda"] = pingu_shooting_left
 
-diccionario_animaciones_projectile_pingu = {}
-diccionario_animaciones_projectile_pingu ["derecha"] = projectile_pingu
-diccionario_animaciones_projectile_pingu ["izquierda"] = projectile_pingu_left
+# diccionario_animaciones_projectile_pingu = {}
+# diccionario_animaciones_projectile_pingu ["derecha"] = projectile_pingu
+# diccionario_animaciones_projectile_pingu ["izquierda"] = projectile_pingu_left
 
 
-diccionario_animaciones_enemy_bird = {}
-diccionario_animaciones_enemy_bird["camina_derecha"] = enemy_bird
-diccionario_animaciones_enemy_bird["camina_izquierda"] = enemy_bird_left
+# diccionario_animaciones_enemy_bird = {}
+# diccionario_animaciones_enemy_bird["camina_derecha"] = enemy_bird
+# diccionario_animaciones_enemy_bird["camina_izquierda"] = enemy_bird_left
 
 

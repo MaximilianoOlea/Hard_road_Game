@@ -26,7 +26,7 @@ class Projectile (pygame.sprite.Sprite):
             a_objective.count_life -= 1
             self.impacted = True
             self.kill()
-            self.play_sound(rf"assets\sounds\pingu\proyectile_collide.mp3")
+            self.play_sound()
         return self.impacted
     
     def update(self):
@@ -38,7 +38,6 @@ class Projectile (pygame.sprite.Sprite):
             self.kill()
 
 
-    def play_sound (self,sound):
-        pygame.mixer.init()
-        pygame.mixer.music.load(sound)
-        pygame.mixer.music.play()
+    def play_sound(self):
+        sound = pygame.mixer.Sound(rf"assets\sounds\pingu\proyectile_collide.mp3")
+        sound.play()

@@ -68,3 +68,54 @@ enemy_bird_animations = [pygame.image.load(rf"assets\enemies\bird\0.png"),
 tupla_enemy_bird_derecha = (0,1,2)
 tupla_enemy_bird_izquierda = (3,4,5)
 
+
+enemy_ghost_animations = [pygame.image.load(rf"assets\enemies\ghost\camina\0.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\1.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\2.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\3.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\left_0.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\left_1.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\left_2.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\camina\left_3.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\1.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\2.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\3.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\4.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\5.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\6.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\7.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_1.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_2.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_3.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_4.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_5.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_6.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\dispara\left_7.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\muerte\0.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\muerte\1.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\muerte\left_0.png"),
+                        pygame.image.load(rf"assets\enemies\ghost\muerte\left_1.png")]
+
+tupla_enemy_ghost_derecha = (0,1,2,3)
+tupla_enemy_ghost_izquierda = (4,5,6,7)
+tupla_enemy_ghost_dispara_derecha = (8,9,10,11,12,13,14)
+tupla_enemy_ghost_dispara_izquierda= (15,16,17,18,19,20,21)
+tupla_enemy_ghost_muere_derecha = (22,23)
+tupla_enemy_ghost_muere_izquierda = (24,25)
+
+
+enemy_wolf_animations = [pygame.image.load(rf"assets\enemies\wolf\camina\0.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\1.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\2.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\3.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\4.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\5.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\left_0.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\left_1.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\left_2.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\left_3.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\left_4.png"),
+                        pygame.image.load(rf"assets\enemies\wolf\camina\left_5.png"),]
+
+tupla_enemy_wolf_derecha = (0,1,2,3,4,5)
+tupla_enemy_wolf_izquierda = (6,7,8,9,10,11)

@@ -16,6 +16,7 @@ class Pingu (pygame.sprite.Sprite):
         self.index = 0
         #Lo necesita cualquier elemento:
         self.image = self.animations[self.index]
+        self.image = self.animations[self.index]
         self.rect = self.image.get_rect()
         self.rect.x = initial_position[0]
         self.rect.y = initial_position[1]  
@@ -23,7 +24,7 @@ class Pingu (pygame.sprite.Sprite):
         self.pos_respaw = initial_position
 
         #Enemigos tambien requieren
-        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],30,10)
+        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],self.rect.width,10)
         self.rect_pies.bottom = self.rect.bottom
 
         #Movimiento: 
@@ -33,7 +34,7 @@ class Pingu (pygame.sprite.Sprite):
         self.jump_power = JUMP_POWER_MAIN_CHARACTER
         self.limit_speed_fall = JUMP_POWER_MAIN_CHARACTER
         self.is_jumping = False
-        self.is_in_floor = False
+        self.is_in_floor = True
         self.movement_y = 0
 
         self.is_looking = "derecha" #Comienza mirando a la derecha
@@ -211,7 +212,7 @@ class Pingu (pygame.sprite.Sprite):
                 self.index+= 1
 
     def jump(self):
-        if not self.is_in_floor:
+        if not self.is_in_floor or self.is_falling:
             self.rect_pies.y += self.movement_y
             self.rect.y += self.movement_y
 
@@ -223,8 +224,7 @@ class Pingu (pygame.sprite.Sprite):
                     self.is_falling = True
                 else:
                     self.is_falling = False
-        else:
-            self.is_falling = False
+ 
 
         self.__jump_draw()
 
@@ -242,20 +242,29 @@ class Pingu (pygame.sprite.Sprite):
             self.is_falling = True
     
     def check_collision_floor(self,floor_impact):
+        flag = False
+        floor_impacted = None 
 
-        if self.is_falling:
-            if self.rect_pies.colliderect(floor_impact):
-                if self.is_falling:
-                    self.rect.bottom = floor_impact.top
-                    self.rect_pies.bottom = floor_impact.top
-                    self.movement_y = 0
-                    self.is_jumping = False
-                    self.is_in_floor = True
-                    self.limit_speed_fall = floor_impact.top
-                    print (self.limit_speed_fall)
-            else:
-                self.bajar_plataforma = True
+        for platform in floor_impact:
+            if self.rect_pies.colliderect(platform):
+                flag = True
+                floor_impacted = platform.rect.top
 
+        if flag:
+            if self.is_falling:
+                self.rect.bottom = floor_impacted
+                self.rect_pies.bottom = floor_impacted
+                self.movement_y = 0
+                self.is_jumping = False
+                self.is_in_floor = True
+                # self.is_falling = False
+        else:
+            self.is_falling = True  # Si no hay colisión, permitir que caiga
+        # if not flag and self.is_in_floor:
+        #     self.is_in_floor = False
+            # self.bajar_plataforma = False
+            # self.is_falling = True 
+            print ("entro")
 
 #Disparar
 
@@ -271,7 +280,6 @@ class Pingu (pygame.sprite.Sprite):
             all_sprite.add(un_projectile)
             self.count_projectile -= 1
             if self.count_projectile == 0:
-                print ("Se acabo los tiros")
                 self.count_projectile = 5
 
     def dead (self,enemy):
@@ -279,9 +287,13 @@ class Pingu (pygame.sprite.Sprite):
             self.is_alive = False
             if self.count_life >= 0:
                 self.count_life -= 1
-    
+            self.play_sound("assets\sounds\menu\dead.mp3")
     def revive (self):
         if not self.is_alive and self.count_life > 0:
             self.is_alive = True
+            self.is_in_floor = True
 
         
+    def play_sound(self,path):
+        sound = pygame.mixer.Sound(path)
+        sound.play()

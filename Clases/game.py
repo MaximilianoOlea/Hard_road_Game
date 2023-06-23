@@ -51,19 +51,29 @@ class Game:
 
         self.sprite_platforms = pygame.sprite.Group()
         self.sprite_projectiles = pygame.sprite.Group()
+        self.sprite_projectiles_enemies = pygame.sprite.Group()
 
 
         self.sprite_enemies = pygame.sprite.Group()
         self.enemy_bird = Bird((10,40))
+        self.enemy_ghost = Ghost((10,200))
+        self.enemy_wolf = Wolf ((10,HEIGHT-700))
         self.all_sprites.add(self.enemy_bird)
+        self.all_sprites.add(self.enemy_ghost)
+        self.all_sprites.add(self.enemy_wolf)
+
         self.sprite_enemies.add(self.enemy_bird)
-        self.create_list_platforms()
+        self.sprite_enemies.add(self.enemy_ghost)
+        self.sprite_enemies.add(self.enemy_wolf)
+
+        self.lista_plataformas = self.create_list_platforms()
 
 
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
         pygame.mixer.init()
         pygame.mixer.music.load(rf"assets\sounds\menu\gameover_trap.mp3")
+        pygame.mixer.music.play(-1)
 # ------------------------------------------------------
 
         # bubble_sort_pisos(self.lista_pisos)
@@ -95,7 +105,7 @@ class Game:
     def finished_game(self):
         """Terminar la partida pero no salir del juego
         """
-        self.jugando = False
+        self.playing = False
         self.finished = True
 
     def game_over(self):
@@ -118,6 +128,25 @@ class Game:
         self.screen.fill((0,0,0))
         self.screen.blit(texto,rect_texto)
         pygame.display.flip()
+
+    def draw_score(self,score):
+
+        texto = self.fuente.render(f"Score:{score}",True,(AMARILLO))
+        rect_texto = texto.get_rect()
+        rect_texto.x = 10
+        self.screen.blit(texto,rect_texto)
+
+    def draw_life(self,count_life):
+        icon_vida = pygame.image.load(rf"assets\menu\life.png")
+        icon_vida = pygame.transform.scale(icon_vida, (40,60)) 
+        rect_icon_vida = icon_vida.get_rect()
+        rect_icon_vida.x = WIDTH-100
+        self.screen.blit(icon_vida,rect_icon_vida)
+        texto = self.fuente.render(f"{count_life}",True,(AZUL))
+        rect_texto = texto.get_rect()
+        rect_texto.x = rect_icon_vida.x + 60
+        self.screen.blit(texto,rect_texto)
+
 
     def show_screen_pause(self):
         # Pausa el juego,muestra Opcion de Reinicio | volver al juego |Salir al menu principal
@@ -165,33 +194,58 @@ class Game:
         """
 
         self.screen.blit(background,(ORIGIN))   
+        self.draw_score(self.pingu.score)
+        self.draw_life(self.pingu.count_life)
+
+
+
+        self.pingu.check_collision_floor(self.lista_plataformas)
+        self.enemy_wolf.check_collision_floor(self.lista_plataformas)
+
+        print("\n")
+        print ("En el suelo:",self.enemy_wolf.is_in_floor)
+
+        for enemy in self.sprite_enemies:
+            for projectile in self.sprite_projectiles:
+                if projectile.check_objective(enemy):
+                    self.pingu.score += 100
+            if enemy.count_life <= 0:
+                enemy.kill()
+                self.all_sprites.remove(enemy)
+                self.sprite_enemies.remove(enemy)
+        for enemy in self.sprite_enemies:
+            self.pingu.dead(enemy)
+        for projectile_enemy in self.sprite_projectiles_enemies:
+            self.pingu.dead(projectile_enemy)    
+
+        #Ghost:
+        if self.enemy_ghost.count_life > 0:
+            if self.enemy_ghost.see_objective(self.pingu):
+                if self.enemy_ghost.is_looking == "derecha":
+                    if self.enemy_ghost.rect.right < self.pingu.rect.left:
+                        self.enemy_ghost.shoot_projectile(
+                        self.enemy_ghost.rect.x+10,self.enemy_ghost.rect.y+10,self.enemy_ghost.is_looking,self.sprite_projectiles_enemies,self.all_sprites)
+                elif self.enemy_ghost.is_looking == "izquierda":
+                    if self.enemy_ghost.rect.left > self.pingu.rect.right:
+                        self.enemy_ghost.shoot_projectile(
+                        self.enemy_ghost.rect.x+10,self.enemy_ghost.rect.y+10,self.enemy_ghost.is_looking,self.sprite_projectiles_enemies,self.all_sprites)                    
+            else:
+                self.enemy_ghost.is_doing = "camina"
+
+        #Wolf
+        if self.enemy_wolf.count_life > 0:
+            if self.enemy_wolf.see_objective(self.pingu):
+                if self.enemy_wolf.is_looking == "derecha":
+                    if self.enemy_wolf.rect.right < self.pingu.rect.left:
+                        self.enemy_wolf.speed = self.enemy_wolf.speed_buff
+                elif self.enemy_wolf.is_looking == "izquierda":    
+                    if self.enemy_wolf.rect.left > self.pingu.rect.right:  
+                        self.enemy_wolf.speed = self.enemy_wolf.speed_buff                
+            else:
+                self.enemy_wolf.speed = SPEED_WOLF
 
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
-
-        for platform in self.sprite_platforms:
-            self.pingu.check_collision_floor(platform.floor_collision)
-        
-        # for projectile in self.sprite_projectiles:
-        #     for enemy in self.sprite_enemies:
-        #         if enemy.count_life < 0:
-        #             lista = pygame.sprite.spritecollide(projectile, enemy, True)
-        #         else:
-        #             lista = pygame.sprite.spritecollide(projectile, enemy, False)
-        #             enemy.count_life -= 1
-
-        #     if len(lista):
-        #         projectile.kill()
-
-        for projectile in self.sprite_projectiles:
-            for enemy in self.sprite_enemies:
-                if projectile.check_objective(enemy):
-                    if enemy.count_life < 0:
-                        enemy.kill()
-
-        self.pingu.dead(self.enemy_bird)
-        print (self.pingu.is_alive)
-        print (self.pingu.count_life)
 
         if self.pingu.count_life <= 0:
             time.sleep(1)
@@ -203,6 +257,10 @@ class Game:
 
             for platform in self.sprite_platforms:
                 self.screen.fill("Green",platform.floor_collision)
+            self.screen.fill("Blue",self.enemy_bird.rect)
+            self.screen.fill("Red",self.enemy_ghost.rect_ojos)
+            self.screen.fill("Red",self.enemy_wolf.rect_ojos)
+            self.screen.fill("Blue",self.enemy_wolf.rect_pies)
 
         pygame.display.flip()
 
@@ -247,22 +305,22 @@ class Game:
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
 
         #MEDIO
-        list_platform.append(self.create_platform((CENTER_X-350, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
 
         #TOP
-        list_platform.append(self.create_platform((CENTER_X-350, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
 
         #Level 2:
 
-
-
         for platform in list_platform:
             self.all_sprites.add(platform)
             self.sprite_platforms.add(platform)
+
+        return list_platform
     def create_platform(self,position:tuple,size:tuple):
         platform = Platform(rf"assets\items\platforms\earth.png",position,size)
         return platform
