@@ -5,6 +5,10 @@ from Configuraciones.config_assets import *
 import time
 from .projectile import Projectile
 from Configuraciones.charge_list_animations import *
+from .item import *
+import random
+
+
 
 class Enemy (pygame.sprite.Sprite):
     def __init__(self,initial_position:tuple,animations,speed,count_life,size):
@@ -58,6 +62,18 @@ class Enemy (pygame.sprite.Sprite):
         else:
             self.see = False
         return self.see
+
+    def drop_item(self,sprite_items,all_sprites):
+
+        if random.randint(1,1) == 1:
+            if random.randint(1,2) == 1:
+                item = Item_fish ((self.rect.x,self.rect.y))
+                sprite_items.add(item)
+                all_sprites.add(item)
+            else:
+                item = Item_boots ((self.rect.x,self.rect.y))
+                sprite_items.add(item)
+                all_sprites.add(item)
 
 class Bird (Enemy):
     def __init__(self,initial_position:tuple):
@@ -126,7 +142,9 @@ class Ghost (Enemy):
         if current_time - self.last_shot_time >= self.time_reload and self.count_projectile > 0:
             #Actualizar ultimo tiro
             self.last_shot_time = current_time  
-            un_projectile = Projectile(rf"assets\enemies\boss\fireboss\power\flame_shoot-PhotoRoom.png-PhotoRoom.png",(pos_x, pos_y),SIZE_PROJECTILE_ENEMY,10,direction_projectile)
+            un_projectile = Projectile(
+            rf"assets\enemies\boss\fireboss\power\flame_shoot-PhotoRoom.png-PhotoRoom.png",(pos_x, pos_y),
+            SIZE_PROJECTILE_ENEMY,SPEED_PROJECTILE_ENEMY,direction_projectile)
             sprites_projectiles.add(un_projectile)
             all_sprite.add(un_projectile)
             self.count_projectile -= 1
@@ -187,3 +205,4 @@ class Wolf (Enemy):
             self.is_in_floor = True
         else:
             self.is_falling = True
+    

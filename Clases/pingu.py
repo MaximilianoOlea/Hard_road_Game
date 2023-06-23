@@ -47,7 +47,7 @@ class Pingu (pygame.sprite.Sprite):
         self.count_projectile = 5
         self.is_alive = True  
         self.last_shot_time = 0
-        self.time_reload = 0.4
+        self.time_reload = SPEED_SHOOT_RELOAD
 
         #Prueba
         self.bajar_plataforma = False
@@ -106,7 +106,6 @@ class Pingu (pygame.sprite.Sprite):
             elif self.is_looking == "izquierda":
                 self.image = self.animations [33]
 
-
         if not self.is_alive:
             if self.count_life <= 0:
                 self.kill()
@@ -120,6 +119,7 @@ class Pingu (pygame.sprite.Sprite):
                     self.rect_pies.x = self.pos_respaw[0]
                     self.rect_pies.y = self.pos_respaw[1]  
                     self.respawn_timer = None
+
         self.jump()
     # Restringir movimientos:
 
@@ -289,9 +289,11 @@ class Pingu (pygame.sprite.Sprite):
                 self.count_life -= 1
             self.play_sound("assets\sounds\menu\dead.mp3")
     def revive (self):
-        if not self.is_alive and self.count_life > 0:
+        if not self.is_alive:
             self.is_alive = True
             self.is_in_floor = True
+            self.speed = SPEED_MAIN_CHARACTER
+            self.time_reload = SPEED_SHOOT_RELOAD
 
         
     def play_sound(self,path):

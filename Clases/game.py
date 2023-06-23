@@ -16,12 +16,8 @@ from .platform import Platform
 
 from .enemy import *
 
-def bubble_sort_pisos(lista_pisos):
-    n = len(lista_pisos)
-    for i in range(n - 1):
-        for j in range(0, n - i - 1):
-            if lista_pisos[j].y < lista_pisos[j + 1].y:
-                lista_pisos[j], lista_pisos[j + 1] = lista_pisos[j + 1], lista_pisos[j]
+from .item import *
+
 
 class Game:
     def __init__(self, size_screen: tuple, name_game: str,icon_path:str):
@@ -52,12 +48,14 @@ class Game:
         self.sprite_platforms = pygame.sprite.Group()
         self.sprite_projectiles = pygame.sprite.Group()
         self.sprite_projectiles_enemies = pygame.sprite.Group()
+        self.sprite_items = pygame.sprite.Group()
 
-
+#ENEMIGOS
         self.sprite_enemies = pygame.sprite.Group()
         self.enemy_bird = Bird((10,40))
-        self.enemy_ghost = Ghost((10,200))
+        self.enemy_ghost = Ghost((900,200))
         self.enemy_wolf = Wolf ((10,HEIGHT-700))
+
         self.all_sprites.add(self.enemy_bird)
         self.all_sprites.add(self.enemy_ghost)
         self.all_sprites.add(self.enemy_wolf)
@@ -66,20 +64,18 @@ class Game:
         self.sprite_enemies.add(self.enemy_ghost)
         self.sprite_enemies.add(self.enemy_wolf)
 
-        self.lista_plataformas = self.create_list_platforms()
 
+        self.lista_plataformas = self.create_list_platforms()
 
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
         pygame.mixer.init()
         pygame.mixer.music.load(rf"assets\sounds\menu\gameover_trap.mp3")
         pygame.mixer.music.play(-1)
+
+
 # ------------------------------------------------------
 
-        # bubble_sort_pisos(self.lista_pisos)
-
-        # self.plataforma = Platform(rf"assets\items\platforms\earth.png",CENTER,SIZE_PLATFORM_MEDIUM)
-        # self.sprite_platforms = pygame.sprite.Group()
 
 # Estados del juego
 
@@ -202,9 +198,7 @@ class Game:
         self.pingu.check_collision_floor(self.lista_plataformas)
         self.enemy_wolf.check_collision_floor(self.lista_plataformas)
 
-        print("\n")
-        print ("En el suelo:",self.enemy_wolf.is_in_floor)
-
+#Impacto de disparo hacia un enemigo:
         for enemy in self.sprite_enemies:
             for projectile in self.sprite_projectiles:
                 if projectile.check_objective(enemy):
@@ -213,6 +207,10 @@ class Game:
                 enemy.kill()
                 self.all_sprites.remove(enemy)
                 self.sprite_enemies.remove(enemy)
+                enemy.drop_item(self.sprite_items,self.all_sprites)
+
+
+#Impacto con enemigo (muerte)
         for enemy in self.sprite_enemies:
             self.pingu.dead(enemy)
         for projectile_enemy in self.sprite_projectiles_enemies:
@@ -243,6 +241,13 @@ class Game:
                         self.enemy_wolf.speed = self.enemy_wolf.speed_buff                
             else:
                 self.enemy_wolf.speed = SPEED_WOLF
+
+
+
+#Items
+        for item in self.sprite_items:
+            item.buff(self.pingu)
+
 
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
