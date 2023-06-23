@@ -20,6 +20,8 @@ class Pingu (pygame.sprite.Sprite):
         self.rect.x = initial_position[0]
         self.rect.y = initial_position[1]  
 
+        self.pos_respaw = initial_position
+
         #Enemigos tambien requieren
         self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],30,10)
         self.rect_pies.bottom = self.rect.bottom
@@ -50,49 +52,73 @@ class Pingu (pygame.sprite.Sprite):
         self.bajar_plataforma = False
 
 
+        self.respawn_time = 3  # Tiempo de espera antes de resucitar en segundos
+        self.respawn_timer = None
+        self.impacted = False
     def update(self):
         #Movimientos laterales
-        match self.is_doing:
-            case "quieto":
-                if not self.is_jumping and self.is_in_floor:
-                    if self.is_looking == "derecha":
-                    #ANIMACION
-                        self.animate_motion(tupla_quieto_derecha)
-                    elif self.is_looking == "izquierda":
-                        self.animate_motion(tupla_quieto_izquierda)
-                else:
-                    if self.is_looking == "derecha":
-                        self.animate_motion(tupla_salta_derecha)
-                    elif self.is_looking == "izquierda":
-                        self.animate_motion(tupla_salta_izquierda)
-                    #---------------------------
-            case "derecha":
-                self.is_looking = "derecha"
-                if not self.is_jumping and self.is_in_floor:
-                    self.animate_motion(tupla_camina_derecha)
-                self.move(self.speed)
-            case "izquierda":
-                self.is_looking = "izquierda"
-                if not self.is_jumping and self.is_in_floor:
-                    self.animate_motion(tupla_camina_izquierda)
-                self.move(self.speed,True,False)
+        if self.is_alive:
+            match self.is_doing:
+                case "quieto":
+                    if not self.is_jumping and self.is_in_floor:
+                        if self.is_looking == "derecha":
+                        #ANIMACION
+                            self.animate_motion(tupla_quieto_derecha)
+                        elif self.is_looking == "izquierda":
+                            self.animate_motion(tupla_quieto_izquierda)
+                    else:
+                        if self.is_looking == "derecha":
+                            self.animate_motion(tupla_salta_derecha)
+                        elif self.is_looking == "izquierda":
+                            self.animate_motion(tupla_salta_izquierda)
+                        #---------------------------
+                case "derecha":
+                    self.is_looking = "derecha"
+                    if not self.is_jumping and self.is_in_floor:
+                        self.animate_motion(tupla_camina_derecha)
+                    self.move(self.speed)
+                case "izquierda":
+                    self.is_looking = "izquierda"
+                    if not self.is_jumping and self.is_in_floor:
+                        self.animate_motion(tupla_camina_izquierda)
+                    self.move(self.speed,True,False)
 
-            case "salta":
-                if not self.is_jumping and self.is_in_floor:
-                    self.is_jumping = True
-                    self.is_in_floor = False
+                case "salta":
+                    if not self.is_jumping and self.is_in_floor:
+                        self.is_jumping = True
+                        self.is_in_floor = False
 
-                    self.move(self.jump_power*-1,False)
+                        self.move(self.jump_power*-1,False)
 
-            case "dispara":
-                if not self.is_jumping:
-                    if self.is_looking == "derecha":
-                        self.animate_motion(tupla_dispara_derecha)
-                    elif self.is_looking == "izquierda":
-                        self.animate_motion(tupla_dispara_izquierda)
+                case "dispara":
+                    if not self.is_jumping:
+                        if self.is_looking == "derecha":
+                            self.animate_motion(tupla_dispara_derecha)
+                        elif self.is_looking == "izquierda":
+                            self.animate_motion(tupla_dispara_izquierda)
 
-        self.image = self.animations[self.index]
+            self.image = self.animations[self.index]
+        else: #Perdio una vida
+            self.rect.y -= 1
+            if self.is_looking == "derecha":
+                self.image = self.animations[32] #Index de la muerte
+            elif self.is_looking == "izquierda":
+                self.image = self.animations [33]
 
+
+        if not self.is_alive:
+            if self.count_life <= 0:
+                self.kill()
+            else:
+                if self.respawn_timer is None:
+                    self.respawn_timer = time.time() + self.respawn_time
+                elif time.time() >= self.respawn_timer:
+                    self.revive()
+                    self.rect.x = self.pos_respaw[0]
+                    self.rect.y = self.pos_respaw[1]
+                    self.rect_pies.x = self.pos_respaw[0]
+                    self.rect_pies.y = self.pos_respaw[1]  
+                    self.respawn_timer = None
         self.jump()
     # Restringir movimientos:
 
@@ -248,5 +274,14 @@ class Pingu (pygame.sprite.Sprite):
                 print ("Se acabo los tiros")
                 self.count_projectile = 5
 
-    def dead (self):
-        pass
+    def dead (self,enemy):
+        if self.rect.colliderect(enemy) and self.is_alive and not self.impacted:
+            self.is_alive = False
+            if self.count_life >= 0:
+                self.count_life -= 1
+    
+    def revive (self):
+        if not self.is_alive and self.count_life > 0:
+            self.is_alive = True
+
+        

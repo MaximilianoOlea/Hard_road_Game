@@ -54,14 +54,16 @@ class Game:
 
 
         self.sprite_enemies = pygame.sprite.Group()
-        self.enemy_bird = Bird((10,main_character_y+40))
+        self.enemy_bird = Bird((10,40))
         self.all_sprites.add(self.enemy_bird)
         self.sprite_enemies.add(self.enemy_bird)
         self.create_list_platforms()
 
-        pygame.mixer.init
 
+        self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
+        pygame.mixer.init()
+        pygame.mixer.music.load(rf"assets\sounds\menu\gameover_trap.mp3")
 # ------------------------------------------------------
 
         # bubble_sort_pisos(self.lista_pisos)
@@ -99,7 +101,7 @@ class Game:
     def game_over(self):
         """Termina la partida pero no el juego
         """
-        self.finalizado = True
+        #self.finalizado = True
         self.show_screen_game_over()
 
 # -------------------
@@ -108,8 +110,14 @@ class Game:
         pass
 
     # Muestra la pantalla de partida perdida
-    def show_screen_game_over(self, image):
-        pass
+    def show_screen_game_over(self):
+
+        texto = self.fuente.render("Game Over",True,(0,0,255))
+        rect_texto = texto.get_rect()
+        rect_texto.center = CENTER 
+        self.screen.fill((0,0,0))
+        self.screen.blit(texto,rect_texto)
+        pygame.display.flip()
 
     def show_screen_pause(self):
         # Pausa el juego,muestra Opcion de Reinicio | volver al juego |Salir al menu principal
@@ -131,7 +139,7 @@ class Game:
                 elif evento.key == pygame.K_RETURN:
                     self.show_screen_pause()
                 elif evento.key == pygame.K_j or evento.key == pygame.K_z:
-                    if not self.pause:
+                    if not self.pause and self.pingu.is_alive:
                         self.pingu.is_doing = "dispara"              
                         self.pingu.shoot_projectile_pingu(
                         self.pingu.rect.x,self.pingu.rect.y,self.pingu.is_looking,self.sprite_projectiles,self.all_sprites)
@@ -141,7 +149,8 @@ class Game:
                         self.pingu.is_in_floor = False
 
         if not self.pause:
-            self.controller_movement()
+            if self.pingu.is_alive:
+                self.controller_movement()
             self.render_screen(background)
             #Si cae sobre un enemigo
 #------------------------------------------------------
@@ -180,15 +189,14 @@ class Game:
                     if enemy.count_life < 0:
                         enemy.kill()
 
-        if pygame.sprite.spritecollide(self.pingu, self.sprite_enemies, False):
-            if self.pingu.count_life < 0:
-                self.pingu.kill()
-            else:
-                self.pingu.count_life -= 1
-                self.pingu.is_alive = False
+        self.pingu.dead(self.enemy_bird)
+        print (self.pingu.is_alive)
+        print (self.pingu.count_life)
 
-
-
+        if self.pingu.count_life <= 0:
+            time.sleep(1)
+            self.show_screen_game_over()
+            
 
         if get_mode():
             self.screen.fill("Blue",self.pingu.rect_pies)
@@ -206,14 +214,9 @@ class Game:
 
 
     def play_sound (self,sound):
-        pygame.mixer.init()
         pygame.mixer.music.load(sound)
         pygame.mixer.music.play()
 
-    def play_music (self,sound):
-        pygame.mixer.init
-        pygame.mixer.music.load(sound)
-        pygame.mixer.music.play(-1)
 
     def controller_movement (self):
         keys = pygame.key.get_pressed()
