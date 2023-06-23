@@ -56,3 +56,15 @@ pingu_animations= [pygame.image.load(rf"assets\pingu\quieto\0.png"),
                     pygame.image.load(rf"assets\pingu\Muerte\0.png"),
                     pygame.image.load(rf"assets\pingu\Muerte\left_0.png") #Muere
                     ]
+
+
+enemy_bird_animations = [pygame.image.load(rf"assets\enemies\bird\0.png"),
+                    pygame.image.load(rf"assets\enemies\bird\1.png"),
+                    pygame.image.load(rf"assets\enemies\bird\2.png"),
+                    pygame.image.load(rf"assets\enemies\bird\left_0.png"),
+                    pygame.image.load(rf"assets\enemies\bird\left_1.png"),
+                    pygame.image.load(rf"assets\enemies\bird\left_2.png"),]
+
+tupla_enemy_bird_derecha = (0,1,2)
+tupla_enemy_bird_izquierda = (3,4,5)
+

@@ -2,6 +2,8 @@ import pygame
 from Configuraciones.charge_list_animations import *
 from tools import *
 from Configuraciones.config_assets import *
+import time
+from .projectile import Projectile
 
 class Pingu (pygame.sprite.Sprite):
     def __init__(self,initial_position:tuple):
@@ -17,6 +19,10 @@ class Pingu (pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = initial_position[0]
         self.rect.y = initial_position[1]  
+
+        #Enemigos tambien requieren
+        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],30,10)
+        self.rect_pies.bottom = self.rect.bottom
 
         #Movimiento: 
         self.speed = SPEED_MAIN_CHARACTER
@@ -34,16 +40,15 @@ class Pingu (pygame.sprite.Sprite):
         self.is_falling = False
 
         self.score = 0
-        self.count_life = 1
+        self.count_life = 3
         self.count_projectile = 5
         self.is_alive = True  
         self.last_shot_time = 0
-        self.time_reload = 1
+        self.time_reload = 0.4
 
         #Prueba
         self.bajar_plataforma = False
-        self.rect_pies = pygame.Rect(initial_position[0],initial_position[1],30,10)
-        self.rect_pies.bottom = self.rect.bottom
+
 
     def update(self):
         #Movimientos laterales
@@ -82,11 +87,10 @@ class Pingu (pygame.sprite.Sprite):
             case "dispara":
                 if not self.is_jumping:
                     if self.is_looking == "derecha":
-                        "anima"
-                        pass
+                        self.animate_motion(tupla_dispara_derecha)
                     elif self.is_looking == "izquierda":
-                        pass
-                        #anima
+                        self.animate_motion(tupla_dispara_izquierda)
+
         self.image = self.animations[self.index]
 
         self.jump()
@@ -213,31 +217,36 @@ class Pingu (pygame.sprite.Sprite):
     
     def check_collision_floor(self,floor_impact):
 
-        if self.rect_pies.colliderect(floor_impact):
-            if self.is_falling:
-                self.rect.bottom = floor_impact.top
-                self.rect_pies.bottom = floor_impact.top
-                self.movement_y = 0
-                self.is_jumping = False
-                self.is_in_floor = True
-                self.limit_speed_fall = floor_impact.top
-                print (self.limit_speed_fall)
-        else:
-            self.bajar_plataforma = True
-            self.is_falling = True
+        if self.is_falling:
+            if self.rect_pies.colliderect(floor_impact):
+                if self.is_falling:
+                    self.rect.bottom = floor_impact.top
+                    self.rect_pies.bottom = floor_impact.top
+                    self.movement_y = 0
+                    self.is_jumping = False
+                    self.is_in_floor = True
+                    self.limit_speed_fall = floor_impact.top
+                    print (self.limit_speed_fall)
+            else:
+                self.bajar_plataforma = True
 
 
+#Disparar
 
-
-
-    # def verificar_colision_piso(self,piso):  
+    def shoot_projectile_pingu(self,pos_x, pos_y,direction_projectile:str,sprites_projectiles,all_sprite):
+        current_time = time.time() # Obtener el tiempo actual en segundos
         
-    #     if self.rect_pies.colliderect(piso):
-    #         self.is_falling = False
-    #         self.limit_speed_fall = piso.top
-    #     else:
-    #         self.is_falling = True
+        # Si desde el ultimo tiro paso 1 segundo habilito a que tire de nuevo
+        if current_time - self.last_shot_time >= self.time_reload and self.count_projectile > 0:
+            #Actualizar ultimo tiro
+            self.last_shot_time = current_time  
+            un_projectile = Projectile(rf"assets\items\pingu_proyectile.png",(pos_x, pos_y),SIZE_PROJECTILE,15,direction_projectile)
+            sprites_projectiles.add(un_projectile)
+            all_sprite.add(un_projectile)
+            self.count_projectile -= 1
+            if self.count_projectile == 0:
+                print ("Se acabo los tiros")
+                self.count_projectile = 5
 
-    # def caida (self):
-    #     if self.is_falling :
-    #         if self.movement_y + self.gravity < self.limit_speed_fall:  
+    def dead (self):
+        pass

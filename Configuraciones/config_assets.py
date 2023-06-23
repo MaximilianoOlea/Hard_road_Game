@@ -2,7 +2,7 @@ import pygame
 
 #Pantalla
 WIDTH = 1800
-HEIGHT = 1000
+HEIGHT = 900
 SIZE_SCREEN = (WIDTH, HEIGHT)
 
 CENTER_X = WIDTH//2

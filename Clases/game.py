@@ -14,6 +14,8 @@ from .pingu import Pingu
 
 from .platform import Platform
 
+from .enemy import *
+
 def bubble_sort_pisos(lista_pisos):
     n = len(lista_pisos)
     for i in range(n - 1):
@@ -43,32 +45,23 @@ class Game:
         
         #Sprites
         self.all_sprites = pygame.sprite.Group()
+
         self.pingu = Pingu((main_character_x,main_character_y))
         self.all_sprites.add(self.pingu)
+
         self.sprite_platforms = pygame.sprite.Group()
-
-        #Piso
-        self.piso = pygame.Rect(600,0,500,20)
-        self.piso.top = self.pingu.rect.bottom + 300
-        self.piso_sides = get_rectangles(self.piso)
-
-        self.piso2 = pygame.Rect(0,50,500,20)
-        #self.piso2.top = 500
+        self.sprite_projectiles = pygame.sprite.Group()
 
 
-        self.piso3 =  pygame.Rect(600,0,500,20)
-        self.piso3.top = 300
-
-        self.piso4 = pygame.Rect(600,0,500,20)
-        self.piso4.top = 200
-
-        self.lista_pisos = []
-        self.lista_pisos.append(self.piso4)
-        self.lista_pisos.append(self.piso2)
-        self.lista_pisos.append(self.piso3)
-        self.index_piso = 0
-
+        self.sprite_enemies = pygame.sprite.Group()
+        self.enemy_bird = Bird((10,main_character_y+40))
+        self.all_sprites.add(self.enemy_bird)
+        self.sprite_enemies.add(self.enemy_bird)
         self.create_list_platforms()
+
+        pygame.mixer.init
+
+
 # ------------------------------------------------------
 
         # bubble_sort_pisos(self.lista_pisos)
@@ -140,21 +133,17 @@ class Game:
                 elif evento.key == pygame.K_j or evento.key == pygame.K_z:
                     if not self.pause:
                         self.pingu.is_doing = "dispara"              
-                        print ("dispara")
+                        self.pingu.shoot_projectile_pingu(
+                        self.pingu.rect.x,self.pingu.rect.y,self.pingu.is_looking,self.sprite_projectiles,self.all_sprites)
                 elif evento.key == pygame.K_DOWN:
                     if self.pingu.is_in_floor:
                         self.pingu.bajar_plataforma = True
                         self.pingu.is_in_floor = False
 
-        
-
         if not self.pause:
             self.controller_movement()
             self.render_screen(background)
             #Si cae sobre un enemigo
-
-
-
 #------------------------------------------------------
 
     def render_screen(self, background):#Object_game seran una lista
@@ -168,34 +157,38 @@ class Game:
 
         self.screen.blit(background,(ORIGIN))   
 
-        # self.pingu.update()
-        #self.pingu.draw(self.screen)
         self.all_sprites.update()
         self.all_sprites.draw(self.screen)
 
-        # for piso in self.lista_pisos:
-        #     if not self.pingu.is_in_floor:
-        #         self.pingu.check_collision_floor(piso)
-        #         print("----------------------------------------")
-        #         print ("Esta en el piso",self.pingu.is_in_floor)
-        #         print ("Bajar de plataforma",self.pingu.bajar_plataforma)
-        #         print ("Esta saltando",self.pingu.is_jumping)
-        #         print("----------------------------------------")
-        #     print("*****************************************")
-        #     print ("Esta en el piso",self.pingu.is_in_floor)
-        #     print ("Bajar de plataforma",self.pingu.bajar_plataforma)
-        #     print ("Esta saltando",self.pingu.is_jumping)
-        #     print("*****************************************")
-
-
         for platform in self.sprite_platforms:
             self.pingu.check_collision_floor(platform.floor_collision)
-            # lista = pygame.sprite.spritecollide(self.pingu, self.sprite_platforms, False)
         
+        # for projectile in self.sprite_projectiles:
+        #     for enemy in self.sprite_enemies:
+        #         if enemy.count_life < 0:
+        #             lista = pygame.sprite.spritecollide(projectile, enemy, True)
+        #         else:
+        #             lista = pygame.sprite.spritecollide(projectile, enemy, False)
+        #             enemy.count_life -= 1
 
-        # print(self.pingu.is_falling,"Esta cayendo")
-        # print (self.pingu.is_in_floor, "Esta en el piso")
-        # print (self.pingu.is_jumping, "Esta saltando")
+        #     if len(lista):
+        #         projectile.kill()
+
+        for projectile in self.sprite_projectiles:
+            for enemy in self.sprite_enemies:
+                if projectile.check_objective(enemy):
+                    if enemy.count_life < 0:
+                        enemy.kill()
+
+        if pygame.sprite.spritecollide(self.pingu, self.sprite_enemies, False):
+            if self.pingu.count_life < 0:
+                self.pingu.kill()
+            else:
+                self.pingu.count_life -= 1
+                self.pingu.is_alive = False
+
+
+
 
         if get_mode():
             self.screen.fill("Blue",self.pingu.rect_pies)
@@ -254,6 +247,14 @@ class Game:
         list_platform.append(self.create_platform((CENTER_X-350, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
+
+        #TOP
+        list_platform.append(self.create_platform((CENTER_X-350, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
+
+        #Level 2:
+
 
 
         for platform in list_platform:
