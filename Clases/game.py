@@ -255,7 +255,7 @@ class Game:
         self.boss.attack_water(self.sprite_projectiles_enemies,self.all_sprites)
         self.boss.attack_fire(
         self.sprite_projectiles_enemies,self.all_sprites)
-
+        self.boss.dash()
 
 
 
@@ -263,6 +263,7 @@ class Game:
             self.boss.attack_one_fire(
             self.sprite_projectiles_enemies,self.all_sprites,(self.boss.rect_ojos.x,self.boss.rect_ojos.y))
             
+
 #Items
         for item in self.sprite_items:
             item.buff(self.pingu)
