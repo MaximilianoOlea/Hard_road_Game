@@ -77,7 +77,7 @@ class Enemy (pygame.sprite.Sprite):
 
 class Bird (Enemy):
     def __init__(self,initial_position:tuple):
-        super().__init__(initial_position,enemy_bird_animations,SPEED_BIRD,6,SIZE_ENEMY_BIRD)
+        super().__init__(initial_position,enemy_bird_animations,SPEED_BIRD,COUNT_LIFE_BIRD,SIZE_ENEMY_BIRD)
 
     def update(self):
         if self.is_looking == "derecha":
@@ -98,7 +98,7 @@ class Bird (Enemy):
 
 class Ghost (Enemy):
     def __init__(self,initial_position:tuple):
-        super().__init__(initial_position,enemy_ghost_animations,SPEED_GHOST,10,SIZE_ENEMY_GHOST)
+        super().__init__(initial_position,enemy_ghost_animations,SPEED_GHOST,COUNT_LIFE_GHOST,SIZE_ENEMY_GHOST)
         self.is_doing = "camina"
         self.time_reload = 4
         self.last_shot_time = 0
@@ -144,7 +144,7 @@ class Ghost (Enemy):
             self.last_shot_time = current_time  
             un_projectile = Projectile(
             rf"assets\enemies\boss\fireboss\power\flame_shoot-PhotoRoom.png-PhotoRoom.png",(pos_x, pos_y),
-            SIZE_PROJECTILE_ENEMY,SPEED_PROJECTILE_ENEMY,direction_projectile)
+            SIZE_PROJECTILE_ENEMY,SPEED_PROJECTILE_ENEMY,direction_projectile,True)
             sprites_projectiles.add(un_projectile)
             all_sprite.add(un_projectile)
             self.count_projectile -= 1
@@ -155,7 +155,7 @@ class Ghost (Enemy):
 
 class Wolf (Enemy):
     def __init__(self,initial_position:tuple):
-        super().__init__(initial_position,enemy_wolf_animations,SPEED_WOLF,6,SIZE_ENEMY_WOLF)
+        super().__init__(initial_position,enemy_wolf_animations,SPEED_WOLF,COUNT_LIFE_WOLF,SIZE_ENEMY_WOLF)
         self.is_in_floor = False
         self.gravity = 5
         self.is_falling = False
@@ -206,3 +206,4 @@ class Wolf (Enemy):
         else:
             self.is_falling = True
     
+

@@ -216,7 +216,6 @@ class Pingu (pygame.sprite.Sprite):
             self.rect_pies.y += self.movement_y
             self.rect.y += self.movement_y
 
-            # self.caer()
             if self.movement_y + self.gravity < self.limit_speed_fall:
                 self.movement_y += self.gravity
                 self.rect_pies.y += self.gravity
@@ -235,11 +234,6 @@ class Pingu (pygame.sprite.Sprite):
             else: 
                 self.animate_motion(tupla_salta_izquierda)
 
-    def caer(self):
-        if self.is_falling:
-            self.movement_y += self.gravity 
-        if not self.is_jumping and not self.is_in_floor:
-            self.is_falling = True
     
     def check_collision_floor(self,floor_impact):
         flag = False
@@ -275,7 +269,8 @@ class Pingu (pygame.sprite.Sprite):
         if current_time - self.last_shot_time >= self.time_reload and self.count_projectile > 0:
             #Actualizar ultimo tiro
             self.last_shot_time = current_time  
-            un_projectile = Projectile(rf"assets\items\pingu_proyectile.png",(pos_x, pos_y),SIZE_PROJECTILE,15,direction_projectile)
+            un_projectile = Projectile(
+            rf"assets\items\pingu_proyectile.png",(pos_x, pos_y),SIZE_PROJECTILE,15,direction_projectile,True)
             sprites_projectiles.add(un_projectile)
             all_sprite.add(un_projectile)
             self.count_projectile -= 1

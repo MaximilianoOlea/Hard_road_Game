@@ -119,3 +119,14 @@ enemy_wolf_animations = [pygame.image.load(rf"assets\enemies\wolf\camina\0.png")
 
 tupla_enemy_wolf_derecha = (0,1,2,3,4,5)
 tupla_enemy_wolf_izquierda = (6,7,8,9,10,11)
+
+boss_animations = [pygame.image.load(rf"assets\enemies\boss\iceboss\sleep.png"), #0 Posicion de dormir
+                pygame.image.load(rf"assets\enemies\boss\iceboss\0.png"),#Se despierta
+                pygame.image.load(rf"assets\enemies\boss\iceboss\1.png"),#Se enoja #ATACANDO CON HIELOS
+                pygame.image.load(rf"assets\enemies\boss\iceboss\2.png"),#Se mueve
+                pygame.image.load(rf"assets\enemies\boss\iceboss\3.png"),#Se queda quieto
+                pygame.image.load(rf"assets\enemies\boss\iceboss\left_2.png"),#Se mueve izquierda
+                pygame.image.load(rf"assets\enemies\boss\iceboss\left_3.png"),]#Se queda quieto izquierda
+
+
+

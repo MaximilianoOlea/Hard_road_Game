@@ -2,6 +2,8 @@ import pygame
 
 import sys 
 
+import random
+
 from Configuraciones.config_assets import *
 
 from Configuraciones.mode import *
@@ -15,6 +17,7 @@ from .pingu import Pingu
 from .platform import Platform
 
 from .enemy import *
+from .boss import Boss
 
 from .item import *
 
@@ -46,26 +49,29 @@ class Game:
         self.all_sprites.add(self.pingu)
 
         self.sprite_platforms = pygame.sprite.Group()
+        self.sprite_enemies = pygame.sprite.Group()
         self.sprite_projectiles = pygame.sprite.Group()
         self.sprite_projectiles_enemies = pygame.sprite.Group()
         self.sprite_items = pygame.sprite.Group()
 
 #ENEMIGOS
-        self.sprite_enemies = pygame.sprite.Group()
-        self.enemy_bird = Bird((10,40))
-        self.enemy_ghost = Ghost((900,200))
-        self.enemy_wolf = Wolf ((10,HEIGHT-700))
+        self.enemy_bird = Bird((random.randint(1,WIDTH-10),random.randint(140,800)))
+        self.enemy_ghost = Ghost((random.randint(1,WIDTH-10),random.randint(140,800)))
+        self.enemy_wolf = Wolf ((random.randint(1,WIDTH-10),random.randint(140,800)))
+        self.boss = Boss((random.randint(1,30),HEIGHT-230))
 
         self.all_sprites.add(self.enemy_bird)
         self.all_sprites.add(self.enemy_ghost)
         self.all_sprites.add(self.enemy_wolf)
+        self.all_sprites.add(self.boss)
 
         self.sprite_enemies.add(self.enemy_bird)
         self.sprite_enemies.add(self.enemy_ghost)
         self.sprite_enemies.add(self.enemy_wolf)
+        self.sprite_enemies.add(self.boss)
 
-
-        self.lista_plataformas = self.create_list_platforms()
+        #self.lista_plataformas = self.create_list_platforms()
+        self.lista_plataformas = self.create_platform_boss()
 
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
@@ -193,6 +199,8 @@ class Game:
         self.draw_score(self.pingu.score)
         self.draw_life(self.pingu.count_life)
 
+        # if not self.sprite_enemies:
+        #     self.create_enemies()
 
 
         self.pingu.check_collision_floor(self.lista_plataformas)
@@ -242,8 +250,19 @@ class Game:
             else:
                 self.enemy_wolf.speed = SPEED_WOLF
 
+        #BOSS:
+        self.boss.attack_ice(self.sprite_projectiles_enemies,self.all_sprites)
+        self.boss.attack_water(self.sprite_projectiles_enemies,self.all_sprites)
+        self.boss.attack_fire(
+        self.sprite_projectiles_enemies,self.all_sprites)
 
 
+
+
+        if self.boss.see_objective(self.pingu):
+            self.boss.attack_one_fire(
+            self.sprite_projectiles_enemies,self.all_sprites,(self.boss.rect_ojos.x,self.boss.rect_ojos.y))
+            
 #Items
         for item in self.sprite_items:
             item.buff(self.pingu)
@@ -266,6 +285,7 @@ class Game:
             self.screen.fill("Red",self.enemy_ghost.rect_ojos)
             self.screen.fill("Red",self.enemy_wolf.rect_ojos)
             self.screen.fill("Blue",self.enemy_wolf.rect_pies)
+            self.screen.fill("Red",self.boss.rect_ojos)
 
         pygame.display.flip()
 
@@ -306,16 +326,16 @@ class Game:
 
         #Primeros escalones
         list_platform.append(self.create_platform((CENTER_X-200, HEIGHT-200), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
+        #list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_SMALL))
+        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
 
         #MEDIO
-        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
 
         #TOP
-        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
+        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
 
@@ -326,6 +346,52 @@ class Game:
             self.sprite_platforms.add(platform)
 
         return list_platform
+    
+    def create_platform_boss(self):
+
+        list_platform = []
+        #Base
+        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
+
+        #Primeros escalones
+        #list_platform.append(self.create_platform((370, HEIGHT-200), SIZE_PLATFORM_BIG))
+        list_platform.append(self.create_platform((0, HEIGHT-300), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
+
+        #MEDIO
+        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
+
+        #TOP
+        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
+        #list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
+
+
+        for platform in list_platform:
+            self.all_sprites.add(platform)
+            self.sprite_platforms.add(platform)
+
+        return list_platform
+    
     def create_platform(self,position:tuple,size:tuple):
         platform = Platform(rf"assets\items\platforms\earth.png",position,size)
         return platform
+    
+    def create_enemies (self):
+        #ENEMIGOS
+        # self.enemy_bird = Bird((random.randint(1,WIDTH-10),random.randint(140,800)))
+        # self.enemy_ghost = Ghost((random.randint(1,WIDTH-10),random.randint(140,800)))
+        # self.enemy_wolf = Wolf ((random.randint(1,WIDTH-10),random.randint(140,800)))
+        self.boss = Boss((random.randint(1,WIDTH-300),HEIGHT-300))
+
+        # self.all_sprites.add(self.enemy_bird)
+        # self.all_sprites.add(self.enemy_ghost)
+        # self.all_sprites.add(self.enemy_wolf)
+        self.all_sprites.add(self.boss)   
+
+        # self.sprite_enemies.add(self.enemy_bird)
+        # self.sprite_enemies.add(self.enemy_ghost)
+        # self.sprite_enemies.add(self.enemy_wolf)
+        self.sprite_enemies.add(self.boss)
