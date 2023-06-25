@@ -18,4 +18,6 @@ class Platform (pygame.sprite.Sprite):
     def update(self):
         pass
         
-    
+class Platform_Ice (Platform):
+    def __init__(initial_position:tuple,size:tuple):
+        super().__init__(rf"assets\items\platforms\ice.png",initial_position,size)    

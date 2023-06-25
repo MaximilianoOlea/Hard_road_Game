@@ -39,7 +39,7 @@ class Game:
         # ----------------------------------------------------
 
         #Test:
-        self.background = pygame.image.load("assets\\backgrounds\grass.png").convert()
+        self.background = pygame.image.load(rf"assets\backgrounds\Bosque.jpg").convert()
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
         
         #Sprites
@@ -58,7 +58,7 @@ class Game:
         self.enemy_bird = Bird((random.randint(1,WIDTH-10),random.randint(140,800)))
         self.enemy_ghost = Ghost((random.randint(1,WIDTH-10),random.randint(140,800)))
         self.enemy_wolf = Wolf ((random.randint(1,WIDTH-10),random.randint(140,800)))
-        self.boss = Boss((random.randint(1,30),HEIGHT-230))
+        self.boss = Boss((random.randint(1,30),HEIGHT-270))
 
         self.all_sprites.add(self.enemy_bird)
         self.all_sprites.add(self.enemy_ghost)
@@ -133,7 +133,7 @@ class Game:
 
     def draw_score(self,score):
 
-        texto = self.fuente.render(f"Score:{score}",True,(AMARILLO))
+        texto = self.fuente.render(f"Score:{score}",True,(ROJO))
         rect_texto = texto.get_rect()
         rect_texto.x = 10
         self.screen.blit(texto,rect_texto)
@@ -142,7 +142,7 @@ class Game:
         icon_vida = pygame.image.load(rf"assets\menu\life.png")
         icon_vida = pygame.transform.scale(icon_vida, (40,60)) 
         rect_icon_vida = icon_vida.get_rect()
-        rect_icon_vida.x = WIDTH-100
+        rect_icon_vida.x = WIDTH-150
         self.screen.blit(icon_vida,rect_icon_vida)
         texto = self.fuente.render(f"{count_life}",True,(AZUL))
         rect_texto = texto.get_rect()
@@ -178,6 +178,11 @@ class Game:
                     if self.pingu.is_in_floor:
                         self.pingu.bajar_plataforma = True
                         self.pingu.is_in_floor = False
+                elif evento.key == pygame.K_p: #Agregar vida
+                    if self.pingu.count_life < 99:
+                        self.pingu.count_life+=1
+                        self.play_sound(rf"assets\sounds\menu\life.mp3")
+
 
         if not self.pause:
             if self.pingu.is_alive:
@@ -217,7 +222,9 @@ class Game:
                 self.sprite_enemies.remove(enemy)
                 enemy.drop_item(self.sprite_items,self.all_sprites)
 
-
+        for projectile in self.sprite_projectiles_enemies:
+            if projectile.impacted:
+                enemy.drop_item(self.sprite_items,self.all_sprites)
 #Impacto con enemigo (muerte)
         for enemy in self.sprite_enemies:
             self.pingu.dead(enemy)
@@ -297,10 +304,14 @@ class Game:
         self.sprites.add(element_sprite)
 
 
-    def play_sound (self,sound):
+    def play_music (self,sound):
         pygame.mixer.music.load(sound)
         pygame.mixer.music.play()
 
+
+    def play_sound(self,path):
+        sound = pygame.mixer.Sound(path)
+        sound.play()
 
     def controller_movement (self):
         keys = pygame.key.get_pressed()
@@ -356,12 +367,12 @@ class Game:
 
         #Primeros escalones
         #list_platform.append(self.create_platform((370, HEIGHT-200), SIZE_PLATFORM_BIG))
-        list_platform.append(self.create_platform((0, HEIGHT-300), SIZE_PLATFORM_SMALL))
+        #list_platform.append(self.create_platform((0, HEIGHT-300), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
 
         #MEDIO
-        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
-        list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        #list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
 
         #TOP
@@ -377,7 +388,7 @@ class Game:
         return list_platform
     
     def create_platform(self,position:tuple,size:tuple):
-        platform = Platform(rf"assets\items\platforms\earth.png",position,size)
+        platform = Platform(rf"assets\items\platforms\ice.png",position,size)
         return platform
     
     def create_enemies (self):

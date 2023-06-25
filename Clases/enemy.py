@@ -65,8 +65,8 @@ class Enemy (pygame.sprite.Sprite):
 
     def drop_item(self,sprite_items,all_sprites):
 
-        if random.randint(1,1) == 1:
-            if random.randint(1,2) == 1:
+        if random.randint(1,2) == 1: #Probabilidad de que dropeen los enemigos
+            if random.randint(1,2) == 1: #50% de fish 50% de boots
                 item = Item_fish ((self.rect.x,self.rect.y))
                 sprite_items.add(item)
                 all_sprites.add(item)

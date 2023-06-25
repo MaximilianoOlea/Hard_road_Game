@@ -20,10 +20,11 @@ import random
 class Boss (Enemy):
     def __init__(self,initial_position:tuple):
         super().__init__(initial_position,boss_animations,SPEED_BOSS,COUNT_LIFE_BOSS,SIZE_BOSS)
-        self.time_reload_ice = 6
+        self.time_reload_ice = 4
         self.time_reload_fire = 4
-        self.time_reload_dash = 15
-        self.last_shot_time = 0
+        self.time_reload_dash = 10
+        self.last_shot_ice = 0
+        self.last_shot_fire = 0
         self.last_dash = 0
         self.count_projectile = 5
         self.attacked_water = False
@@ -41,10 +42,10 @@ class Boss (Enemy):
         if self.count_life < COUNT_LIFE_BOSS - 30:
             self.fases = 2
             self.image = self.animations[2]
-        if self.count_life < COUNT_LIFE_BOSS - 70:
+        if self.count_life < COUNT_LIFE_BOSS - 100:
             self.fases = 3
             self.image = self.animations[3]
-        if self.count_life < COUNT_LIFE_BOSS - 100 and self.is_doing == "volar":
+        if self.count_life < COUNT_LIFE_BOSS - 140 and self.is_doing == "volar":
             self.fases = 4
             if self.rect.top >= 0 and self.up:
                 self.rect.y -= 3
@@ -56,7 +57,7 @@ class Boss (Enemy):
                     self.rect_ojos.y +=3
                 else:
                     self.up = True
-        if self.count_life < COUNT_LIFE_BOSS - 150:
+        if self.count_life < COUNT_LIFE_BOSS - 200:
             self.fases = 5
             if self.rect.right <= WIDTH and self.right == True and self.is_doing == "avalanzar" :
                 self.rect.x += 12
@@ -76,13 +77,13 @@ class Boss (Enemy):
 
 
     def attack_ice (self,sprites_projectiles,all_sprite):
-        if self.fases == 1 or  self.fases == 2:
+        if self.fases == 1 or  self.fases == 2 or self.fases == 5:
             current_time = time.time() # Obtener el tiempo actual en segundos
             # Si desde el ultimo tiro paso 1 segundo habilito a que tire de nuevo
-            if current_time - self.last_shot_time >= self.time_reload_ice:
+            if current_time - self.last_shot_ice >= self.time_reload_ice:
                 #Actualizar ultimo tiro
-                self.last_shot_time = current_time  
-                self.create_ice_shot(sprites_projectiles,all_sprite,20)
+                self.last_shot_ice = current_time  
+                self.create_ice_shot(sprites_projectiles,all_sprite,10)
 
     
     def attack_water (self,sprites_projectiles,all_sprite):
@@ -102,9 +103,9 @@ class Boss (Enemy):
         if self.fases == 3:
             current_time = time.time() # Obtener el tiempo actual en segundos
             # Si desde el ultimo tiro paso 1 segundo habilito a que tire de nuevo
-            if current_time - self.last_shot_time >= self.time_reload_fire :
+            if current_time - self.last_shot_fire >= self.time_reload_fire :
                 #Actualizar ultimo tiro
-                self.last_shot_time = current_time 
+                self.last_shot_fire = current_time 
                 self.create_fire_shot(sprites_projectiles,all_sprite,3)
 
 
@@ -115,15 +116,16 @@ class Boss (Enemy):
 
         for i in range(count):
             un_projectile = Fire_shoot((0,random.randint(200,HEIGHT-100)))
+            un_projectile.speed = random.randint(7,12)
             sprites_projectiles.add(un_projectile)
             all_sprite.add(un_projectile)
 
     def attack_one_fire (self,sprites_projectiles,all_sprite,pos_initial):
         current_time = time.time() # Obtener el tiempo actual en segundos
         # Si desde el ultimo tiro paso 1 segundo habilito a que tire de nuevo
-        if current_time - self.last_shot_time >= self.time_reload_fire :
+        if current_time - self.last_shot_fire >= self.time_reload_fire :
             #Actualizar ultimo tiro
-            self.last_shot_time = current_time 
+            self.last_shot_fire = current_time 
             if self.fases == 4 or self.fases == 5:
                 self.create_one_fire_shot(sprites_projectiles,all_sprite,pos_initial)
 
@@ -160,10 +162,9 @@ class Boss (Enemy):
 
     def dash (self):
 
-        if self.fases == 5:
-            current_time = time.time() # Obtener el tiempo actual en segundos
-            # Si desde el ultimo tiro paso 1 segundo habilito a que tire de nuevo
-            if current_time - self.last_dash >= self.time_reload_dash :
-                #Actualizar ultimo tiro
+        current_time = time.time() # Obtener el tiempo actual en segundos
+        if current_time - self.last_dash >= self.time_reload_dash :
+
+            if self.fases == 5:
                 self.last_dash = current_time 
                 self.is_doing = "avalanzar"

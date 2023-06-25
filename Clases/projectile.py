@@ -1,6 +1,8 @@
 import pygame
 from Configuraciones.config_assets import *
 import random
+
+from .item import *
 class Projectile (pygame.sprite.Sprite):
     def __init__(self,path:str,initial_position:tuple,size,speed_proyectile:int,direction_projectile:str,is_eliminate:bool):
         super().__init__()

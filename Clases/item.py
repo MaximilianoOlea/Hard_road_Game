@@ -50,12 +50,13 @@ class Item_boots (Item):
     def __init__(self,initial_position):
         super().__init__("assets\items\item_bota_speed.png",initial_position,SIZE_ITEM)
         self.speed_buff = 11
+        self.speed_animation_buff = 3
     def update(self):
         pass
     def buff (self,a_objective):
         if self.check_collision(a_objective):
             a_objective.speed = self.speed_buff
-
+            a_objective.speed_animation = self.speed_animation_buff
 
 #LOGICA PARA LOS PINCHES DE HIELO DE ARRIBA QUE CAEN
 

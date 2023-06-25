@@ -289,7 +289,7 @@ class Pingu (pygame.sprite.Sprite):
             self.is_in_floor = True
             self.speed = SPEED_MAIN_CHARACTER
             self.time_reload = SPEED_SHOOT_RELOAD
-
+            self.speed_animation = SPEED_ANIMATION
         
     def play_sound(self,path):
         sound = pygame.mixer.Sound(path)
