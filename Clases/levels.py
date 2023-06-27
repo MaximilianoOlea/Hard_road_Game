@@ -54,28 +54,28 @@ class Level (pygame.sprite.Sprite):
 
 class Level1 (Level):
     def __init__(self):
-        super().__init__(1,rf"assets\backgrounds\bosque2.jpg",rf"assets\sounds\level\ademas_de_mi.mp3") 
+        super().__init__(1,rf"assets\backgrounds\garden.png",rf"assets\sounds\level\ademas_de_mi.mp3") 
         self.list_platforms = self.create_list_platforms()
         self.create_enemies()
-        
+
     def create_enemies(self):
         #Bird (3)
         a_enemy = Bird((random.randint(1,WIDTH-10),100)) #Top
-        self.sprite_enemies(a_enemy)
-        self.all_sprites(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
 
         a_enemy = Bird((random.randint(1,400),330)) #MID
-        self.sprite_enemies(a_enemy)
-        self.all_sprites(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
 
         a_enemy = Bird((WIDTH-200,750)) #Bot
-        self.sprite_enemies(a_enemy)
-        self.all_sprites(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
 
         #Ghost (1):
         a_enemy = Ghost((random.randint(600,WIDTH),370)) #Mid
-        self.sprite_enemies(a_enemy)
-        self.all_sprites(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
 
 
     def create_list_platforms(self):
@@ -106,9 +106,89 @@ class Level1 (Level):
 
 
 
+class Level2 (Level):
+    def __init__(self):
+        super().__init__(2,rf"assets\backgrounds\grass.png",rf"assets\sounds\level\level2_paulo.mp3") 
+        self.list_platforms = self.create_list_platforms()
+        self.create_enemies()
+        
+    def create_enemies(self):
+        #Wolf (3)
+        a_enemy = Wolf ((100,170)) #Top
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
+
+        a_enemy = Wolf ((100,300)) #Mid
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
+
+        a_enemy = Wolf ((100,580)) #bot
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
+
+        #Ghost (3):
+
+        a_enemy = Ghost((random.randint(0,WIDTH),200)) #Top
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
+
+        a_enemy = Ghost((random.randint(0,WIDTH),370)) #Mid
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
+
+        a_enemy = Ghost((random.randint(0,WIDTH),580)) #Bot
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
 
 
 
+    def create_list_platforms(self):
+
+        list_platform = []
+        #Base
+        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
+        #Bot
+        list_platform.append(self.create_platform((120, HEIGHT-200), SIZE_PLATFORM_GIGANT))
+
+        #MEDIO
+        list_platform.append(self.create_platform((120, HEIGHT-400), SIZE_PLATFORM_GIGANT))
+        #TOP
+        list_platform.append(self.create_platform((120, HEIGHT-600), SIZE_PLATFORM_GIGANT))
 
 
+        for platform in list_platform:
+            self.all_sprites.add(platform)
+            self.sprite_platforms.add(platform)
 
+        return list_platform
+
+
+class Level3 (Level):
+    def __init__(self):
+        super().__init__(1,rf"assets\backgrounds\bosque2.jpg",rf"assets\sounds\level\level3_midtown.mp3") 
+        self.list_platforms = self.create_list_platforms()
+        self.create_enemies()
+
+    def create_enemies(self):
+        self.boss = Boss((random.randint(0,300),HEIGHT-270))
+        self.all_sprites.add(self.boss)   
+        self.sprite_enemies.add(self.boss)
+
+    def create_list_platforms(self):
+
+        list_platform = []
+        #Base
+        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
+        #Bot
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
+        #MEDIO
+        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
+        #TOP
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
+
+        for platform in list_platform:
+            self.all_sprites.add(platform)
+            self.sprite_platforms.add(platform)
+
+        return list_platform

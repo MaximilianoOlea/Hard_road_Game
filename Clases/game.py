@@ -17,10 +17,12 @@ from .pingu import Pingu
 from .platform import Platform
 
 from .enemy import *
+
 from .boss import Boss
 
 from .item import *
 
+from .levels import *
 
 class Game:
     def __init__(self, size_screen: tuple, name_game: str,icon_path:str):
@@ -38,9 +40,8 @@ class Game:
         self.pause = False
         # ----------------------------------------------------
 
-        #Test:
-        self.background = pygame.image.load(rf"assets\backgrounds\garden.png").convert()
-        self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
+#LEVEL
+        self.level = Level1()
         
         #Sprites
         self.all_sprites = pygame.sprite.Group()
@@ -56,9 +57,9 @@ class Game:
 
 #ENEMIGOS
         self.enemy_bird = Bird((WIDTH-250,750))
-        self.enemy_ghost = Ghost((random.randint(600,WIDTH),370))
-        self.enemy_wolf = Wolf ((random.randint(1,WIDTH-10),random.randint(140,800)))
-        self.boss = Boss((random.randint(1,30),HEIGHT-270))
+        self.enemy_ghost = Ghost((random.randint(600,WIDTH),580))
+        self.enemy_wolf = Wolf ((100,580))
+        self.boss = Boss((0,HEIGHT-270))
 
         self.all_sprites.add(self.enemy_bird)
         self.all_sprites.add(self.enemy_ghost)
@@ -70,14 +71,11 @@ class Game:
         self.sprite_enemies.add(self.enemy_wolf)
         self.sprite_enemies.add(self.boss)
 
-        #self.lista_plataformas = self.create_list_platforms()
-        self.lista_plataformas = self.create_list_platforms()
+        for platform in self.level.list_platforms:
+            self.all_sprites.add(platform)
 
-        self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
-        pygame.mixer.init()
-        pygame.mixer.music.load(rf"assets\sounds\level\level3_midtown.mp3")
-        pygame.mixer.music.play(-1)
+
 
 
 # ------------------------------------------------------
@@ -97,7 +95,7 @@ class Game:
 
         while self.playing:
             self.clock.tick(fps)
-            self.handle_event(self.background)
+            self.handle_event(self.level.background)
     def exit(self):
         """Salir definitivamente del juego
         """
@@ -124,7 +122,7 @@ class Game:
     # Muestra la pantalla de partida perdida
     def show_screen_game_over(self):
 
-        texto = self.fuente.render("Game Over",True,(0,0,255))
+        texto = self.level.fuente.render("Game Over",True,(0,0,255))
         rect_texto = texto.get_rect()
         rect_texto.center = CENTER 
         self.screen.fill((0,0,0))
@@ -133,7 +131,7 @@ class Game:
 
     def draw_score(self,score):
 
-        texto = self.fuente.render(f"Score:{score}",True,(ROJO))
+        texto = self.level.fuente.render(f"Score:{score}",True,(ROJO))
         rect_texto = texto.get_rect()
         rect_texto.x = 10
         self.screen.blit(texto,rect_texto)
@@ -144,7 +142,7 @@ class Game:
         rect_icon_vida = icon_vida.get_rect()
         rect_icon_vida.x = WIDTH-150
         self.screen.blit(icon_vida,rect_icon_vida)
-        texto = self.fuente.render(f"{count_life}",True,(AZUL))
+        texto = self.level.fuente.render(f"{count_life}",True,(AZUL))
         rect_texto = texto.get_rect()
         rect_texto.x = rect_icon_vida.x + 60
         self.screen.blit(texto,rect_texto)
@@ -185,7 +183,7 @@ class Game:
 
 
         if not self.pause:
-            if self.pingu.is_alive:
+            if self.level.pingu.is_alive:
                 self.controller_movement()
             self.render_screen(background)
             #Si cae sobre un enemigo
@@ -201,15 +199,15 @@ class Game:
         """
 
         self.screen.blit(background,(ORIGIN))   
-        self.draw_score(self.pingu.score)
-        self.draw_life(self.pingu.count_life)
+        self.draw_score(self.level.pingu.score)
+        self.draw_life(self.level.pingu.count_life)
 
         # if not self.sprite_enemies:
         #     self.create_enemies()
 
-
-        self.pingu.check_collision_floor(self.lista_plataformas)
-        self.enemy_wolf.check_collision_floor(self.lista_plataformas)
+        #
+        self.pingu.check_collision_floor(self.level.list_platforms)
+        self.enemy_wolf.check_collision_floor(self.level.list_platforms)
 
 #Impacto de disparo hacia un enemigo:
         for enemy in self.sprite_enemies:
