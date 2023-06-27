@@ -52,11 +52,12 @@ class Boss (Enemy):
                 self.rect_ojos.y -= 3
             else:
                 self.up = False
-                if self.rect.bottom <= HEIGHT - 100:
+                if self.rect.bottom <= HEIGHT:
                     self.rect.y += 3
                     self.rect_ojos.y +=3
                 else:
                     self.up = True
+
         if self.count_life < COUNT_LIFE_BOSS - 200:
             self.fases = 5
             if self.rect.right <= WIDTH and self.right == True and self.is_doing == "avalanzar" :

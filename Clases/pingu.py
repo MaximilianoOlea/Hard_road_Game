@@ -56,6 +56,7 @@ class Pingu (pygame.sprite.Sprite):
         self.respawn_time = 3  # Tiempo de espera antes de resucitar en segundos
         self.respawn_timer = None
         self.impacted = False
+        self.vulnerable = True
     def update(self):
         #Movimientos laterales
         if self.is_alive:
@@ -117,7 +118,7 @@ class Pingu (pygame.sprite.Sprite):
                     self.rect.x = self.pos_respaw[0]
                     self.rect.y = self.pos_respaw[1]
                     self.rect_pies.x = self.pos_respaw[0]
-                    self.rect_pies.y = self.pos_respaw[1]  
+                    self.rect_pies.y = self.rect.bottom 
                     self.respawn_timer = None
 
         self.jump()

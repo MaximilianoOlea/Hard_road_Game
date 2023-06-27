@@ -39,7 +39,7 @@ class Game:
         # ----------------------------------------------------
 
         #Test:
-        self.background = pygame.image.load(rf"assets\backgrounds\Bosque.jpg").convert()
+        self.background = pygame.image.load(rf"assets\backgrounds\garden.png").convert()
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
         
         #Sprites
@@ -55,8 +55,8 @@ class Game:
         self.sprite_items = pygame.sprite.Group()
 
 #ENEMIGOS
-        self.enemy_bird = Bird((random.randint(1,WIDTH-10),random.randint(140,800)))
-        self.enemy_ghost = Ghost((random.randint(1,WIDTH-10),random.randint(140,800)))
+        self.enemy_bird = Bird((WIDTH-250,750))
+        self.enemy_ghost = Ghost((random.randint(600,WIDTH),370))
         self.enemy_wolf = Wolf ((random.randint(1,WIDTH-10),random.randint(140,800)))
         self.boss = Boss((random.randint(1,30),HEIGHT-270))
 
@@ -71,12 +71,12 @@ class Game:
         self.sprite_enemies.add(self.boss)
 
         #self.lista_plataformas = self.create_list_platforms()
-        self.lista_plataformas = self.create_platform_boss()
+        self.lista_plataformas = self.create_list_platforms()
 
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
         pygame.mixer.init()
-        pygame.mixer.music.load(rf"assets\sounds\menu\gameover_trap.mp3")
+        pygame.mixer.music.load(rf"assets\sounds\level\level3_midtown.mp3")
         pygame.mixer.music.play(-1)
 
 
@@ -258,11 +258,13 @@ class Game:
                 self.enemy_wolf.speed = SPEED_WOLF
 
         #BOSS:
-        self.boss.attack_ice(self.sprite_projectiles_enemies,self.all_sprites)
-        self.boss.attack_water(self.sprite_projectiles_enemies,self.all_sprites)
-        self.boss.attack_fire(
-        self.sprite_projectiles_enemies,self.all_sprites)
-        self.boss.dash()
+        if self.boss.count_life > 0:
+
+            self.boss.attack_ice(self.sprite_projectiles_enemies,self.all_sprites)
+            self.boss.attack_water(self.sprite_projectiles_enemies,self.all_sprites)
+            self.boss.attack_fire(
+            self.sprite_projectiles_enemies,self.all_sprites)
+            self.boss.dash()
 
 
 
@@ -311,6 +313,7 @@ class Game:
 
     def play_sound(self,path):
         sound = pygame.mixer.Sound(path)
+        sound.set_volume(0.3)
         sound.play()
 
     def controller_movement (self):
@@ -338,16 +341,16 @@ class Game:
 
         #Primeros escalones
         list_platform.append(self.create_platform((CENTER_X-200, HEIGHT-200), SIZE_PLATFORM_SMALL))
-        #list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_SMALL))
-        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_SMALL))
+        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
 
         #MEDIO
-        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
 
         #TOP
-        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
+        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
         list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
         list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
 
@@ -390,7 +393,39 @@ class Game:
     def create_platform(self,position:tuple,size:tuple):
         platform = Platform(rf"assets\items\platforms\ice.png",position,size)
         return platform
-    
+
+
+
+    def create_list_platforms_level_2(self):
+        #Level 1:
+        list_platform = []
+        #Base
+        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
+
+        #Primeros escalones
+        list_platform.append(self.create_platform((120, HEIGHT-200), SIZE_PLATFORM_GIGANT))
+        #list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_GIGANT))
+        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
+
+        #MEDIO
+        list_platform.append(self.create_platform((120, HEIGHT-400), SIZE_PLATFORM_GIGANT))
+        #list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
+        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_GIGANT[0], HEIGHT-400), SIZE_PLATFORM_GIGANT))
+
+        #TOP
+        list_platform.append(self.create_platform((120, HEIGHT-600), SIZE_PLATFORM_GIGANT))
+        #list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_GIGANT))
+        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
+
+        #Level 2:
+
+        for platform in list_platform:
+            self.all_sprites.add(platform)
+            self.sprite_platforms.add(platform)
+
+        return list_platform
+
+
     def create_enemies (self):
         #ENEMIGOS
         # self.enemy_bird = Bird((random.randint(1,WIDTH-10),random.randint(140,800)))

@@ -58,6 +58,7 @@ class Projectile (pygame.sprite.Sprite):
 
     def play_sound(self):
         sound = pygame.mixer.Sound(rf"assets\sounds\pingu\proyectile_collide.mp3")
+        sound.set_volume(0.3)
         sound.play()
 
 
