@@ -83,12 +83,16 @@ class Bird (Enemy):
         if self.is_looking == "derecha":
             if self.rect.right <= WIDTH: #Debe recibir la plataforma
                 self.rect.x += self.speed
+                self.rect_ojos.x += self.speed
+                self.rect_pies.x += self.speed
                 self.animate_motion(tupla_enemy_bird_derecha)
             else:
                 self.is_looking = "izquierda"
         elif self.is_looking == "izquierda":
             if self.rect.left >= 0:
                 self.rect.x += self.speed*-1
+                self.rect_ojos.x += self.speed*-1
+                self.rect_pies.x += self.speed*-1
                 self.animate_motion(tupla_enemy_bird_izquierda)
             else:
                 self.is_looking = "derecha"
@@ -110,6 +114,8 @@ class Ghost (Enemy):
                 if self.rect.right <= WIDTH: #Debe recibir la plataforma
                     self.rect.x += self.speed
                     self.rect_ojos.x += self.speed
+                    self.rect_pies.x += self.speed
+                    
                     if self.is_doing != "dispara":
                         self.animate_motion(tupla_enemy_ghost_derecha)
                     else:
@@ -120,6 +126,8 @@ class Ghost (Enemy):
                 if self.rect.left >= 0:
                     self.rect.x += self.speed*-1
                     self.rect_ojos.x += self.speed*-1
+                    self.rect_pies.x += self.speed*-1
+
                     if self.is_doing != "dispara":
                         self.animate_motion(tupla_enemy_ghost_izquierda)
                     else:

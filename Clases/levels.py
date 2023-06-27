@@ -24,14 +24,20 @@ class Level (pygame.sprite.Sprite):
 
 #Sprites
         self.all_sprites = pygame.sprite.Group()
+
         self.pingu = Pingu((main_character_x,main_character_y))
         self.all_sprites.add(self.pingu)
+
         self.sprite_platforms = pygame.sprite.Group()
         self.sprite_enemies = pygame.sprite.Group()
+        self.sprite_enemies_wolf = pygame.sprite.Group()
+        self.sprite_enemies_ghost = pygame.sprite.Group()
+
         self.sprite_projectiles = pygame.sprite.Group()
         self.sprite_projectiles_enemies = pygame.sprite.Group()
         self.sprite_items = pygame.sprite.Group()
 
+    
         self.list_platforms = []
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
@@ -73,10 +79,10 @@ class Level1 (Level):
         self.all_sprites.add(a_enemy)
 
         #Ghost (1):
-        a_enemy = Ghost((random.randint(600,WIDTH),370)) #Mid
+        a_enemy = Ghost((random.randint(600,WIDTH),390)) #Mid
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
-
+        self.sprite_enemies_ghost.add(a_enemy)
 
     def create_list_platforms(self):
         list_platform = []
@@ -117,28 +123,34 @@ class Level2 (Level):
         a_enemy = Wolf ((100,170)) #Top
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
+        self.sprite_enemies_wolf.add(a_enemy)
 
         a_enemy = Wolf ((100,300)) #Mid
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
+        self.sprite_enemies_wolf.add(a_enemy)
 
         a_enemy = Wolf ((100,580)) #bot
-        self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.sprite_enemies_wolf.add(a_enemy)
 
         #Ghost (3):
 
         a_enemy = Ghost((random.randint(0,WIDTH),200)) #Top
-        self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.sprite_enemies_ghost.add(a_enemy)
 
         a_enemy = Ghost((random.randint(0,WIDTH),370)) #Mid
-        self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
+        self.sprite_enemies.add(a_enemy)
+        self.sprite_enemies_ghost.add(a_enemy)
 
         a_enemy = Ghost((random.randint(0,WIDTH),580)) #Bot
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
+        self.sprite_enemies_ghost.add(a_enemy)
 
 
 
