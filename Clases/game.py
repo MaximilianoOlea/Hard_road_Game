@@ -24,6 +24,8 @@ from .item import *
 
 from .levels import *
 
+from .menu import Menu
+
 class Game:
     def __init__(self, size_screen: tuple, name_game: str,icon_path:str):
 
@@ -39,54 +41,19 @@ class Game:
         self.finished = True
         self.pause = False
         # ----------------------------------------------------
+        self.menu = Menu()
+#LEVELs
+        self.index_level = 0
+        self.list_levels = [Level1(),Level2(),Level3()]
 
-#LEVEL
-        self.level = Level1()
+        pygame.mixer.init()
+        pygame.mixer.music.load(self.list_levels[self.index_level].music)
+        pygame.mixer.music.play(-1)
         
-        #Sprites
-        # self.all_sprites = pygame.sprite.Group()
+        self.pingu = Pingu((main_character_x,main_character_y))
+        self.list_levels[self.index_level].all_sprites.add(self.pingu)
 
-        # self.level.pingu = Pingu((main_character_x,main_character_y))
-        # self.all_sprites.add(self.level.pingu)
-
-        self.sprite_platforms = pygame.sprite.Group()
-        self.sprite_enemies = pygame.sprite.Group()
-        self.sprite_projectiles = pygame.sprite.Group()
-        self.sprite_projectiles_enemies = pygame.sprite.Group()
-        self.sprite_items = pygame.sprite.Group()
-
-
-#ENEMIGOS
-        #self.enemy_bird = Bird((WIDTH-250,750))
-        #self.enemy_ghost = Ghost((random.randint(600,WIDTH),580))
-        # self.enemy_wolf = Wolf ((100,580))
-        #self.boss = Boss((0,HEIGHT-270))
-
-        #self.all_sprites.add(self.enemy_bird)
-        #self.all_sprites.add(self.enemy_ghost)
-        #self.all_sprites.add(self.enemy_wolf)
-        #self.all_sprites.add(self.boss)
-
-        #self.sprite_enemies.add(self.enemy_bird)
-        #self.sprite_enemies.add(self.enemy_ghost)
-        # self.sprite_enemies.add(self.enemy_wolf)
-        #self.sprite_enemies.add(self.boss)
-
-        # for platform in self.level.list_platforms:
-        #     self.all_sprites.add(platform)
-
-
-
-        #Test
-        # self.sprite_wolf = pygame.sprite.Group()
-        # self.sprite_wolf.add(self.enemy_wolf)
-        # self.segundo_wolf = Wolf ((200,580))
-        # self.sprite_wolf.add(self.segundo_wolf)
-        # self.all_sprites.add(self.segundo_wolf)
-        # self.sprite_enemies.add(self.segundo_wolf)
-
-
-
+        self.game_over_music = False
 # ------------------------------------------------------
 
 
@@ -101,10 +68,13 @@ class Game:
         """
         self.playing = True
         self.finished = False
-
+        self.pause = False
         while self.playing:
             self.clock.tick(fps)
-            self.handle_event(self.level.background)
+            self.handle_event()
+
+
+        
     def exit(self):
         """Salir definitivamente del juego
         """
@@ -123,6 +93,32 @@ class Game:
         #self.finalizado = True
         self.show_screen_game_over()
 
+    def win_level (self):
+
+        if not self.list_levels[self.index_level].sprite_enemies:
+            self.list_levels[self.index_level].all_sprites.remove(self.pingu)
+            self.index_level += 1
+            if self.index_level < len(self.list_levels):
+                self.list_levels[self.index_level].all_sprites.add(self.pingu)
+                self.pingu.rect.x = self.pingu.pos_respaw[0]
+                self.pingu.rect.y = self.pingu.pos_respaw[1]
+                self.pingu.rect_pies.x = self.pingu.pos_respaw[0]
+                self.pingu.rect_pies.y = self.pingu.rect.bottom 
+                self.change_music()
+            else:
+                self.play_music(rf"assets\sounds\menu\gameover_trap.mp3")
+                print("No hay mas niveles")
+
+    def change_music(self):
+        pygame.mixer.music.stop()
+        self.play_sound(rf"assets\sounds\menu\win.mp3")
+        time.sleep(2)
+        if self.index_level < len(self.list_levels):
+            pygame.mixer.music.load(self.list_levels[self.index_level].music)  # Carga la música del siguiente nivel
+            pygame.mixer.music.play(-1)
+
+
+
 # -------------------
 
     def reset(self):  # Debe recibir el nivel
@@ -130,17 +126,25 @@ class Game:
 
     # Muestra la pantalla de partida perdida
     def show_screen_game_over(self):
+        if not self.game_over_music:
+            pygame.mixer.music.stop()  
+            pygame.mixer.music.load(rf"assets\sounds\menu\gameover_trap.mp3")  
+            pygame.mixer.music.play(-1) 
+            self.game_over_music = True
 
-        texto = self.level.fuente.render("Game Over",True,(0,0,255))
+        texto = self.list_levels[0].fuente.render("Game Over", True, (0, 0, 255))
         rect_texto = texto.get_rect()
-        rect_texto.center = CENTER 
-        self.screen.fill((0,0,0))
-        self.screen.blit(texto,rect_texto)
+        rect_texto.center = CENTER
+        self.screen.fill((0, 0, 0))
+        self.screen.blit(texto, rect_texto)
         pygame.display.flip()
+
+        pygame.display.flip()
+
 
     def draw_score(self,score):
 
-        texto = self.level.fuente.render(f"Score:{score}",True,(ROJO))
+        texto = self.list_levels[0].fuente.render(f"Score:{score}",True,(ROJO))
         rect_texto = texto.get_rect()
         rect_texto.x = 10
         self.screen.blit(texto,rect_texto)
@@ -151,56 +155,68 @@ class Game:
         rect_icon_vida = icon_vida.get_rect()
         rect_icon_vida.x = WIDTH-150
         self.screen.blit(icon_vida,rect_icon_vida)
-        texto = self.level.fuente.render(f"{count_life}",True,(AZUL))
+        texto = self.list_levels[0].fuente.render(f"{count_life}",True,(AZUL))
         rect_texto = texto.get_rect()
         rect_texto.x = rect_icon_vida.x + 60
         self.screen.blit(texto,rect_texto)
-
 
     def show_screen_pause(self):
         # Pausa el juego,muestra Opcion de Reinicio | volver al juego |Salir al menu principal
         self.pause = not self.pause
         self.play_sound(rf"assets\sounds\menu\pause.mp3")
+
+        if self.pause:
+            pygame.mixer.music.pause()  # Pausa la música
+        else:
+            pygame.mixer.music.unpause()  # Reanuda la música
+
         return self.pause
+    
 #Manejador de eventos:
-    def handle_event(self,background):
+    def handle_event(self):
         """_summary_
         Controla los eventos del juego
         """
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.exit()
+            elif evento.type == pygame.KEYDOWN :
 
-            elif evento.type == pygame.KEYDOWN:
-                if evento.key == pygame.K_TAB:
-                    change_mode()  # Modo admid (Ver rectangulos de colision)
-                elif evento.key == pygame.K_RETURN:
-                    self.show_screen_pause()
-                elif evento.key == pygame.K_j or evento.key == pygame.K_z:
-                    if not self.pause and self.level.pingu.is_alive:
-                        self.level.pingu.is_doing = "dispara"              
-                        self.level.pingu.shoot_projectile_pingu(
-                        self.level.pingu.rect.x,self.level.pingu.rect.y,
-                        self.level.pingu.is_looking,self.level.sprite_projectiles,self.level.all_sprites)
+                if self.index_level < len(self.list_levels):
+                    if evento.key == pygame.K_TAB:
+                        change_mode()  # Modo admid (Ver rectangulos de colision)
+                    elif evento.key == pygame.K_RETURN:
+                        self.show_screen_pause()
+                    elif evento.key == pygame.K_j or evento.key == pygame.K_z:
+                        if not self.pause and self.pingu.is_alive:
+                            self.pingu.is_doing = "dispara"              
+                            self.pingu.shoot_projectile_pingu(
+                            self.pingu.rect.x,self.pingu.rect.y,
+                            self.pingu.is_looking,self.list_levels[self.index_level].sprite_projectiles,self.list_levels[self.index_level].all_sprites)
 
-                elif evento.key == pygame.K_DOWN:
-                    if self.level.pingu.is_in_floor:
-                        self.level.pingu.bajar_plataforma = True
-                        self.level.pingu.is_in_floor = False
-                elif evento.key == pygame.K_p: #Agregar vida
-                    if self.level.pingu.count_life < 99:
-                        self.level.pingu.count_life+=1
-                        self.play_sound(rf"assets\sounds\menu\life.mp3")
+                    elif evento.key == pygame.K_DOWN:
+                        if self.pingu.is_in_floor:
+                            self.pingu.bajar_plataforma = True
+                            self.pingu.is_in_floor = False
+                    elif evento.key == pygame.K_p: #Agregar vida
+                        if self.pingu.count_life < 99:
+                            self.pingu.count_life+=1
+                            self.play_sound(rf"assets\sounds\menu\life.mp3")
 
 
         if not self.pause:
-            if self.level.pingu.is_alive:
-                self.controller_movement()
-            self.render_screen(background)
+            if self.index_level < len(self.list_levels):
+                if self.pingu.is_alive:
+                    self.controller_movement()
+            self.render_screen()
+        else: #Display Menu
+            self.menu.draw_text("Pausa","Red",self.screen,(750,400))
+            pygame.display.flip()
+
             #Si cae sobre un enemigo
 #------------------------------------------------------
 
-    def render_screen(self, background):#Object_game seran una lista
+    def render_screen(self):#Object_game seran una lista
         """_summary_
         Actualiza los elementos de la pantalla
 
@@ -208,125 +224,115 @@ class Game:
             screen (_type_): Pantalla en la que va a blitearse
             object_game (list): Todos los elementos del juego (Lista de diccionarios)
         """
+        if self.index_level < len(self.list_levels):
+            self.screen.blit(self.list_levels[self.index_level].background,(ORIGIN))  
+            self.draw_score(self.pingu.score)
+            self.draw_life(self.pingu.count_life)
 
-        self.screen.blit(self.level.background,(ORIGIN))   
-        self.draw_score(self.level.pingu.score)
-        self.draw_life(self.level.pingu.count_life)
-
-        # if not self.sprite_enemies:
-        #     self.create_enemies()
-
-        #
-        self.level.pingu.check_collision_floor(self.level.list_platforms)
+            self.pingu.check_collision_floor(self.list_levels[self.index_level].list_platforms)
 
 
-#Impacto de disparo hacia un enemigo:
-        for enemy in self.level.sprite_enemies:
-            for projectile in self.level.sprite_projectiles:
-                if projectile.check_objective(enemy):
-                    self.level.pingu.score += 100
-            if enemy.count_life <= 0:
-                enemy.kill()
-                self.level.all_sprites.remove(enemy)
-                self.level.sprite_enemies.remove(enemy)
-                enemy.drop_item(self.level.sprite_items,self.level.all_sprites)
+    #Impacto de disparo hacia un enemigo:
+            for enemy in self.list_levels[self.index_level].sprite_enemies:
+                for projectile in self.list_levels[self.index_level].sprite_projectiles:
+                    if projectile.check_objective(enemy):
+                        self.pingu.score += 100
+                if enemy.count_life <= 0:
+                    enemy.kill()
+                    self.list_levels[self.index_level].all_sprites.remove(enemy)
+                    self.list_levels[self.index_level].sprite_enemies.remove(enemy)
+                    enemy.drop_item(self.list_levels[self.index_level].sprite_items,self.list_levels[self.index_level].all_sprites)
 
-        for projectile in self.level.sprite_projectiles_enemies:
-            if projectile.impacted:
-                enemy.drop_item(self.level.sprite_items,self.level.all_sprites)
+            for projectile in self.list_levels[self.index_level].sprite_projectiles_enemies:
+                if projectile.impacted:
+                    enemy.drop_item(self.list_levels[self.index_level].sprite_items,self.list_levels[self.index_level].all_sprites)
 
-#Impacto con enemigo (muerte)
+    #Impacto con enemigo (muerte)
 
-        for enemy in self.level.sprite_enemies:
-            self.level.pingu.dead(enemy)
-        for projectile_enemy in self.level.sprite_projectiles_enemies:
-            self.level.pingu.dead(projectile_enemy)    
+            for enemy in self.list_levels[self.index_level].sprite_enemies:
+                self.pingu.dead(enemy)
+            for projectile_enemy in self.list_levels[self.index_level].sprite_projectiles_enemies:
+                self.pingu.dead(projectile_enemy)    
 
-        #Ghost:
+            #Ghost:
 
-        if self.level.sprite_enemies_ghost:
-            for ghost in self.level.sprite_enemies_ghost:
-                if ghost.count_life > 0:
-                    if ghost.see_objective(self.level.pingu):
-                        if ghost.is_looking == "derecha":
-                            if ghost.rect.right < self.level.pingu.rect.left:
-                                ghost.shoot_projectile(
-                                ghost.rect.x+10,ghost.rect.y+10,ghost.is_looking,
-                                self.level.sprite_projectiles_enemies,self.level.all_sprites)
-                        elif ghost.is_looking == "izquierda":
-                            if ghost.rect.left > self.level.pingu.rect.right:
-                                ghost.shoot_projectile(
-                                ghost.rect.x+10,ghost.rect.y+10,
-                                ghost.is_looking,self.level.sprite_projectiles_enemies,self.level.all_sprites)                    
+            if self.list_levels[self.index_level].sprite_enemies_ghost:
+                for ghost in self.list_levels[self.index_level].sprite_enemies_ghost:
+                    if ghost.count_life > 0:
+                        if ghost.see_objective(self.pingu):
+                            if ghost.is_looking == "derecha":
+                                if ghost.rect.right < self.pingu.rect.left:
+                                    ghost.shoot_projectile(
+                                    ghost.rect.x+10,ghost.rect.y+10,ghost.is_looking,
+                                    self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
+                            elif ghost.is_looking == "izquierda":
+                                if ghost.rect.left > self.pingu.rect.right:
+                                    ghost.shoot_projectile(
+                                    ghost.rect.x+10,ghost.rect.y+10,
+                                    ghost.is_looking,self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)                    
+                        else:
+                            ghost.is_doing = "camina"
+
+            #Wolf
+
+            for wolf in self.list_levels[self.index_level].sprite_enemies_wolf:
+                wolf.check_collision_floor(self.list_levels[self.index_level].list_platforms)
+
+                if wolf.count_life > 0:
+                    if wolf.see_objective(self.pingu):
+                        if wolf.is_looking == "derecha":
+                            if wolf.rect.right < self.pingu.rect.left:
+                                wolf.speed = wolf.speed_buff
+                        elif wolf.is_looking == "izquierda":    
+                            if wolf.rect.left > self.pingu.rect.right:  
+                                wolf.speed = wolf.speed_buff                
                     else:
-                        ghost.is_doing = "camina"
+                        wolf.speed = SPEED_WOLF
 
-        #Wolf
+    #BOSS     
+            if self.list_levels[self.index_level].have_boss and self.list_levels[self.index_level].boss.count_life > 0:
 
-        for wolf in self.level.sprite_enemies_wolf:
-            wolf.check_collision_floor(self.level.list_platforms)
+                self.list_levels[self.index_level].boss.attack_ice(self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
+                self.list_levels[self.index_level].boss.attack_water(self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
+                self.list_levels[self.index_level].boss.attack_fire(
+                self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
+                self.list_levels[self.index_level].boss.dash()
 
-            if wolf.count_life > 0:
-                if wolf.see_objective(self.level.pingu):
-                    if wolf.is_looking == "derecha":
-                        if wolf.rect.right < self.level.pingu.rect.left:
-                            wolf.speed = wolf.speed_buff
-                    elif wolf.is_looking == "izquierda":    
-                        if wolf.rect.left > self.level.pingu.rect.right:  
-                            wolf.speed = wolf.speed_buff                
-                else:
-                    wolf.speed = SPEED_WOLF
+                if self.list_levels[self.index_level].boss.see_objective(self.pingu):
+                    self.list_levels[self.index_level].boss.attack_one_fire(
+                    self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites,
+                    (self.list_levels[self.index_level].boss.rect_ojos.x,self.list_levels[self.index_level].boss.rect_ojos.y))
+    
+    #Item
 
-        #BOSS:
-        # if self.boss.count_life > 0:
+            for item in self.list_levels[self.index_level].sprite_items:
+                item.buff(self.pingu)
 
-        #     self.boss.attack_ice(self.sprite_projectiles_enemies,self.all_sprites)
-        #     self.boss.attack_water(self.sprite_projectiles_enemies,self.all_sprites)
-        #     self.boss.attack_fire(
-        #     self.sprite_projectiles_enemies,self.all_sprites)
-        #     self.boss.dash()
+            self.list_levels[self.index_level].all_sprites.update()
+            self.list_levels[self.index_level].all_sprites.draw(self.screen)
 
+            if self.pingu.count_life <= 0 or self.index_level > len(self.list_levels):
+                time.sleep(1)
+                self.show_screen_game_over()
+                
 
+            if get_mode():
+                self.screen.fill("Blue",self.pingu.rect_pies)
 
-        # if self.boss.see_objective(self.level.pingu):
-        #     self.boss.attack_one_fire(
-        #     self.sprite_projectiles_enemies,self.all_sprites,(self.boss.rect_ojos.x,self.boss.rect_ojos.y))
-            
+                for platform in self.list_levels[self.index_level].sprite_platforms:
+                    self.screen.fill("Yellow",platform.floor_collision)
 
-#Items
+                if self.list_levels[self.index_level].sprite_enemies:
+                    for enemy in self.list_levels[self.index_level].sprite_enemies:
+                        self.screen.fill ("Red",enemy.rect_pies)
+                        self.screen.fill("Green",enemy.rect_ojos)
 
-
-        for item in self.level.sprite_items:
-            item.buff(self.level.pingu)
-
-        self.level.all_sprites.update()
-        self.level.all_sprites.draw(self.screen)
-
-        if self.level.pingu.count_life <= 0:
-            time.sleep(1)
+            self.win_level()
+            pygame.display.flip()
+        else:
             self.show_screen_game_over()
-            
-
-        if get_mode():
-            self.screen.fill("Blue",self.level.pingu.rect_pies)
-
-            for platform in self.sprite_platforms:
-                self.screen.fill("Green",platform.floor_collision)
-
-            if self.level.sprite_enemies:
-                for enemy in self.level.sprite_enemies:
-                    self.screen.fill ("Red",enemy.rect_pies)
-                    self.screen.fill("Green",enemy.rect_ojos)
-
-        pygame.display.flip()
-
 
 #---------------------------------------------------------
-    def add_sprite(self,element_sprite):
-
-        self.sprites.add(element_sprite)
-
-
     def play_music (self,sound):
         pygame.mixer.music.load(sound)
         pygame.mixer.music.play()
@@ -341,125 +347,15 @@ class Game:
         keys = pygame.key.get_pressed()
 
         if keys[pygame.K_LEFT] or keys[pygame.K_a]:
-            self.level.pingu.is_doing = "izquierda"
-            self.level.pingu.is_looking = "izquierda"
+            self.pingu.is_doing = "izquierda"
+            self.pingu.is_looking = "izquierda"
 
         elif keys[pygame.K_RIGHT] or keys[pygame.K_d]:
-            self.level.pingu.is_doing = "derecha"
-            self.level.pingu.is_looking = "derecha"
+            self.pingu.is_doing = "derecha"
+            self.pingu.is_looking = "derecha"
         elif keys[pygame.K_x] or keys[pygame.K_k]:
-            self.level.pingu.is_doing = "salta"
+            self.pingu.is_doing = "salta"
         elif keys[pygame.K_j] or keys[pygame.K_z]:
-            self.level.pingu.is_doing = "dispara"              
+            self.pingu.is_doing = "dispara"              
         else:
-            self.level.pingu.is_doing = "quieto"     
-
-    def create_list_platforms(self):
-        #Level 1:
-        list_platform = []
-        #Base
-        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
-
-        #Primeros escalones
-        list_platform.append(self.create_platform((CENTER_X-200, HEIGHT-200), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
-
-        #MEDIO
-        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
-        list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
-
-        #TOP
-        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
-        list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
-
-        #Level 2:
-
-        for platform in list_platform:
-            self.all_sprites.add(platform)
-            self.sprite_platforms.add(platform)
-
-        return list_platform
-    
-    def create_platform_boss(self):
-
-        list_platform = []
-        #Base
-        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
-
-        #Primeros escalones
-        #list_platform.append(self.create_platform((370, HEIGHT-200), SIZE_PLATFORM_BIG))
-        #list_platform.append(self.create_platform((0, HEIGHT-300), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
-
-        #MEDIO
-        list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-400), SIZE_PLATFORM_MEDIUM))
-        #list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-400), SIZE_PLATFORM_SMALL))
-
-        #TOP
-        #list_platform.append(self.create_platform((CENTER_X-310, HEIGHT-600), SIZE_PLATFORM_MEDIUM))
-        #list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_SMALL))
-        list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
-
-
-        for platform in list_platform:
-            self.all_sprites.add(platform)
-            self.sprite_platforms.add(platform)
-
-        return list_platform
-    
-    def create_platform(self,position:tuple,size:tuple):
-        platform = Platform(rf"assets\items\platforms\ice.png",position,size)
-        return platform
-
-
-
-    def create_list_platforms_level_2(self):
-        #Level 1:
-        list_platform = []
-        #Base
-        list_platform.append(self.create_platform((0,HEIGHT-20), (WIDTH,30)))
-
-        #Primeros escalones
-        list_platform.append(self.create_platform((120, HEIGHT-200), SIZE_PLATFORM_GIGANT))
-        #list_platform.append(self.create_platform((0, HEIGHT-200), SIZE_PLATFORM_GIGANT))
-        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-200), SIZE_PLATFORM_SMALL))
-
-        #MEDIO
-        list_platform.append(self.create_platform((120, HEIGHT-400), SIZE_PLATFORM_GIGANT))
-        #list_platform.append(self.create_platform((0, HEIGHT-400), SIZE_PLATFORM_SMALL))
-        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_GIGANT[0], HEIGHT-400), SIZE_PLATFORM_GIGANT))
-
-        #TOP
-        list_platform.append(self.create_platform((120, HEIGHT-600), SIZE_PLATFORM_GIGANT))
-        #list_platform.append(self.create_platform((0, HEIGHT-600), SIZE_PLATFORM_GIGANT))
-        #list_platform.append(self.create_platform((WIDTH - SIZE_PLATFORM_SMALL[0], HEIGHT-600), SIZE_PLATFORM_SMALL))
-
-        #Level 2:
-
-        for platform in list_platform:
-            self.all_sprites.add(platform)
-            self.sprite_platforms.add(platform)
-
-        return list_platform
-
-
-    def create_enemies (self):
-        #ENEMIGOS
-        # self.enemy_bird = Bird((random.randint(1,WIDTH-10),random.randint(140,800)))
-        # self.enemy_ghost = Ghost((random.randint(1,WIDTH-10),random.randint(140,800)))
-        # self.enemy_wolf = Wolf ((random.randint(1,WIDTH-10),random.randint(140,800)))
-        self.boss = Boss((random.randint(1,WIDTH-300),HEIGHT-300))
-
-        # self.all_sprites.add(self.enemy_bird)
-        # self.all_sprites.add(self.enemy_ghost)
-        # self.all_sprites.add(self.enemy_wolf)
-        self.all_sprites.add(self.boss)   
-
-        # self.sprite_enemies.add(self.enemy_bird)
-        # self.sprite_enemies.add(self.enemy_ghost)
-        # self.sprite_enemies.add(self.enemy_wolf)
-        self.sprite_enemies.add(self.boss)
+            self.pingu.is_doing = "quieto"     

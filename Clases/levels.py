@@ -20,13 +20,14 @@ class Level (pygame.sprite.Sprite):
         super().__init__()
         self.time = 0
         self.key_win = False
-        self.is_level = is_level
+        self.is_level = 1
 
+        # if self.key_win
 #Sprites
         self.all_sprites = pygame.sprite.Group()
 
-        self.pingu = Pingu((main_character_x,main_character_y))
-        self.all_sprites.add(self.pingu)
+        #self.pingu = Pingu((main_character_x,main_character_y))
+        #self.all_sprites.add(self.pingu)
 
         self.sprite_platforms = pygame.sprite.Group()
         self.sprite_enemies = pygame.sprite.Group()
@@ -37,15 +38,14 @@ class Level (pygame.sprite.Sprite):
         self.sprite_projectiles_enemies = pygame.sprite.Group()
         self.sprite_items = pygame.sprite.Group()
 
+        self.have_boss = False
     
         self.list_platforms = []
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
         self.background = pygame.image.load(background).convert()
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
-        pygame.mixer.init()
-        pygame.mixer.music.load(music)
-        pygame.mixer.music.play(-1)
+        self.music = music
 
     def win (self):
         if not self.sprite_enemies: #Si se eliminaron todos, gana
@@ -78,11 +78,16 @@ class Level1 (Level):
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
 
-        #Ghost (1):
+        #Ghost (2):
         a_enemy = Ghost((random.randint(600,WIDTH),390)) #Mid
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
         self.sprite_enemies_ghost.add(a_enemy)
+
+        a_enemy = Ghost((random.randint(0,WIDTH),600)) #Bot
+        self.sprite_enemies.add(a_enemy)
+        self.all_sprites.add(a_enemy)
+        self.sprite_enemies_ghost.add(a_enemy)        
 
     def create_list_platforms(self):
         list_platform = []
@@ -142,12 +147,12 @@ class Level2 (Level):
         self.sprite_enemies.add(a_enemy)
         self.sprite_enemies_ghost.add(a_enemy)
 
-        a_enemy = Ghost((random.randint(0,WIDTH),370)) #Mid
+        a_enemy = Ghost((random.randint(0,WIDTH),390)) #Mid
         self.all_sprites.add(a_enemy)
         self.sprite_enemies.add(a_enemy)
         self.sprite_enemies_ghost.add(a_enemy)
 
-        a_enemy = Ghost((random.randint(0,WIDTH),580)) #Bot
+        a_enemy = Ghost((random.randint(0,WIDTH),600)) #Bot
         self.sprite_enemies.add(a_enemy)
         self.all_sprites.add(a_enemy)
         self.sprite_enemies_ghost.add(a_enemy)
@@ -177,11 +182,9 @@ class Level2 (Level):
 
 class Level3 (Level):
     def __init__(self):
-        super().__init__(1,rf"assets\backgrounds\bosque2.jpg",rf"assets\sounds\level\level3_midtown.mp3") 
+        super().__init__(1,rf"assets\menu\WallpaperDog-11005240.png",rf"assets\sounds\level\level3_midtown.mp3") 
         self.list_platforms = self.create_list_platforms()
-        self.create_enemies()
-
-    def create_enemies(self):
+        self.have_boss = True
         self.boss = Boss((random.randint(0,300),HEIGHT-270))
         self.all_sprites.add(self.boss)   
         self.sprite_enemies.add(self.boss)
