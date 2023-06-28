@@ -2,25 +2,15 @@ import pygame
 
 import sys 
 
-import random
 
 from Configuraciones.config_assets import *
 
 from Configuraciones.mode import *
 
-from Configuraciones.diccionarios_assets import *
-
 from Configuraciones.charge_list_animations import *
 
 from .pingu import Pingu
 
-from .platform import Platform
-
-from .enemy import *
-
-from .boss import Boss
-
-from .item import *
 
 from .levels import *
 
@@ -61,6 +51,7 @@ class Game:
 
         self.game_over_music = False
         self.win_all = False
+        self.buttom_start_clicked = False
 # ------------------------------------------------------
 
 
@@ -100,7 +91,6 @@ class Game:
         """
         #self.finalizado = True
         self.show_screen_game_over()
-
     def win_level (self):
 
         if not self.level_playing.sprite_enemies:
@@ -134,19 +124,17 @@ class Game:
 # -------------------
 
     def reset(self):  # Debe recibir el nivel
-        print ("index antes de resetear",self.index_level)
-        if self.win_all:
+        if self.win_all or self.buttom_start_clicked:
             self.index_level = 0
             self.win_all = False
-            print ("Se RESETEO(GANO TODO)")
+
         self.level_playing = self.list_levels[self.index_level]
         self.level_playing.restart()
         self.level_playing.all_sprites.add(self.pingu)
         self.pingu.restart()
         self.pause = False
         self.change_music(rf"assets\sounds\menu\boton.mp3")
-        print ("se reseteo")
-        print ("index despues",self.index_level)
+ 
 
     # Muestra la pantalla de partida perdida
     def show_screen_game_over(self):
@@ -159,11 +147,11 @@ class Game:
         texto = self.list_levels[0].fuente.render("Game Over", True, (0, 0, 255))
         rect_texto = texto.get_rect()
         rect_texto.center = CENTER
-        self.screen.fill((0, 0, 0))
         self.screen.blit(texto, rect_texto)
+        if self.menu.back.draw(self.screen):
+            self.menu_state = "main"
         pygame.display.flip()
 
-        pygame.display.flip()
 
 
     def draw_score(self,score):
@@ -346,7 +334,6 @@ class Game:
             self.level_playing.all_sprites.draw(self.screen)
 
             if self.pingu.count_life <= 0 or self.index_level > len(self.list_levels):
-                time.sleep(1)
                 self.show_screen_game_over()
                 
 
@@ -402,9 +389,10 @@ class Game:
             if self.menu.start.draw(self.screen):
                 self.reset()
                 self.menu_state = "playing"
-
+                self.buttom_start_clicked = True
             if self.menu.quit.draw(self.screen):
                 self.exit()
+
             pygame.display.flip()
 
     def win_game(self):

@@ -296,6 +296,7 @@ class Pingu (pygame.sprite.Sprite):
         self.speed_animation = SPEED_ANIMATION
         self.speed = SPEED_MAIN_CHARACTER
         self.time_reload = SPEED_SHOOT_RELOAD
+        self.is_alive = True
         self.score = 0
 
     def play_sound(self,path):
