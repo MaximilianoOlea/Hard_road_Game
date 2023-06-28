@@ -53,7 +53,7 @@ class Pingu (pygame.sprite.Sprite):
         self.bajar_plataforma = False
 
 
-        self.respawn_time = 3  # Tiempo de espera antes de resucitar en segundos
+        self.respawn_time = 3  #Tiempo de resucitacion espera
         self.respawn_timer = None
         self.impacted = False
         self.vulnerable = True
