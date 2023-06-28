@@ -102,6 +102,8 @@ class Pingu (pygame.sprite.Sprite):
             self.image = self.animations[self.index]
         else: #Perdio una vida
             self.rect.y -= 1
+            self.is_falling = False
+            self.is_in_floor = True
             if self.is_looking == "derecha":
                 self.image = self.animations[32] #Index de la muerte
             elif self.is_looking == "izquierda":
