@@ -31,6 +31,7 @@ class Boss (Enemy):
         self.fases = 0
         self.is_alive = True
         self.rect_ojos.x = self.rect.right
+        self.rect_ojos.y = self.rect.top +  50
         self.up = True
         self.right = True
         self.is_doing = "volar"

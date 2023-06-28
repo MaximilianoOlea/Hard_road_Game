@@ -42,18 +42,25 @@ class Game:
         self.pause = False
         # ----------------------------------------------------
         self.menu = Menu()
-#LEVELs
-        self.index_level = 0
-        self.list_levels = [Level1(),Level2(),Level3()]
+        self.menu_state = "main"
 
+#LEVELS
+
+        self.index_level = 0
+        #self.lists_levels = [Level1(),Level2(),Level3()]
+        self.list_levels = [Level1(),Level2(),Level3()]
+        self.level_playing = self.list_levels[self.index_level]
+        
         pygame.mixer.init()
-        pygame.mixer.music.load(self.list_levels[self.index_level].music)
-        pygame.mixer.music.play(-1)
+        pygame.mixer.music.load(self.level_playing.music)
+        if self.menu_state != "main":
+            pygame.mixer.music.play(-1)
         
         self.pingu = Pingu((main_character_x,main_character_y))
-        self.list_levels[self.index_level].all_sprites.add(self.pingu)
+        self.level_playing.all_sprites.add(self.pingu)
 
         self.game_over_music = False
+        self.win_all = False
 # ------------------------------------------------------
 
 
@@ -71,6 +78,7 @@ class Game:
         self.pause = False
         while self.playing:
             self.clock.tick(fps)
+            self.show_main_menu()
             self.handle_event()
 
 
@@ -95,26 +103,30 @@ class Game:
 
     def win_level (self):
 
-        if not self.list_levels[self.index_level].sprite_enemies:
-            self.list_levels[self.index_level].all_sprites.remove(self.pingu)
+        if not self.level_playing.sprite_enemies:
+            self.level_playing.all_sprites.remove(self.pingu)
             self.index_level += 1
+            print ("index win",self.index_level)
+            print ("gano todo estado",self.win_all)
             if self.index_level < len(self.list_levels):
-                self.list_levels[self.index_level].all_sprites.add(self.pingu)
+                self.level_playing = self.list_levels[self.index_level]
+                self.level_playing.restart()
+                self.level_playing.all_sprites.add(self.pingu)
                 self.pingu.rect.x = self.pingu.pos_respaw[0]
                 self.pingu.rect.y = self.pingu.pos_respaw[1]
                 self.pingu.rect_pies.x = self.pingu.pos_respaw[0]
                 self.pingu.rect_pies.y = self.pingu.rect.bottom 
-                self.change_music()
+                self.change_music(rf"assets\sounds\menu\win.mp3")
             else:
                 self.play_music(rf"assets\sounds\menu\gameover_trap.mp3")
                 print("No hay mas niveles")
 
-    def change_music(self):
+    def change_music(self,sound):
         pygame.mixer.music.stop()
-        self.play_sound(rf"assets\sounds\menu\win.mp3")
-        time.sleep(2)
+        self.play_sound(sound)
+        time.sleep(1)
         if self.index_level < len(self.list_levels):
-            pygame.mixer.music.load(self.list_levels[self.index_level].music)  # Carga la música del siguiente nivel
+            pygame.mixer.music.load(self.level_playing.music)  # Carga la música del siguiente nivel
             pygame.mixer.music.play(-1)
 
 
@@ -122,7 +134,19 @@ class Game:
 # -------------------
 
     def reset(self):  # Debe recibir el nivel
-        pass
+        print ("index antes de resetear",self.index_level)
+        if self.win_all:
+            self.index_level = 0
+            self.win_all = False
+            print ("Se RESETEO(GANO TODO)")
+        self.level_playing = self.list_levels[self.index_level]
+        self.level_playing.restart()
+        self.level_playing.all_sprites.add(self.pingu)
+        self.pingu.restart()
+        self.pause = False
+        self.change_music(rf"assets\sounds\menu\boton.mp3")
+        print ("se reseteo")
+        print ("index despues",self.index_level)
 
     # Muestra la pantalla de partida perdida
     def show_screen_game_over(self):
@@ -176,12 +200,12 @@ class Game:
     def handle_event(self):
         """_summary_
         Controla los eventos del juego
-        """
+        """            
+        
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.exit()
             elif evento.type == pygame.KEYDOWN :
-
                 if self.index_level < len(self.list_levels):
                     if evento.key == pygame.K_TAB:
                         change_mode()  # Modo admid (Ver rectangulos de colision)
@@ -192,7 +216,7 @@ class Game:
                             self.pingu.is_doing = "dispara"              
                             self.pingu.shoot_projectile_pingu(
                             self.pingu.rect.x,self.pingu.rect.y,
-                            self.pingu.is_looking,self.list_levels[self.index_level].sprite_projectiles,self.list_levels[self.index_level].all_sprites)
+                            self.pingu.is_looking,self.level_playing.sprite_projectiles,self.level_playing.all_sprites)
 
                     elif evento.key == pygame.K_DOWN:
                         if self.pingu.is_in_floor:
@@ -203,16 +227,26 @@ class Game:
                             self.pingu.count_life+=1
                             self.play_sound(rf"assets\sounds\menu\life.mp3")
 
+        if self.menu_state == "playing":
 
-        if not self.pause:
-            if self.index_level < len(self.list_levels):
-                if self.pingu.is_alive:
-                    self.controller_movement()
-            self.render_screen()
-        else: #Display Menu
-            self.menu.draw_text("Pausa","Red",self.screen,(750,400))
-            pygame.display.flip()
-
+            if not self.pause:
+                if self.index_level < len(self.list_levels):
+                    if self.pingu.is_alive:
+                        self.controller_movement()
+                self.render_screen()
+            else: #Display Menu
+                #Testeo
+                self.screen.blit(self.menu.background,ORIGIN)
+                if self.menu.exit.draw(self.screen):
+                    self.menu_state = "main"
+                # if self.menu.start.draw(self.screen):
+                #     pass
+                if self.menu.restart.draw(self.screen):
+                    self.reset()
+                if self.menu.reanude.draw(self.screen):
+                    self.show_screen_pause()
+                    self.change_music(rf"assets\sounds\menu\boton.mp3")
+                pygame.display.flip()
             #Si cae sobre un enemigo
 #------------------------------------------------------
 
@@ -225,58 +259,58 @@ class Game:
             object_game (list): Todos los elementos del juego (Lista de diccionarios)
         """
         if self.index_level < len(self.list_levels):
-            self.screen.blit(self.list_levels[self.index_level].background,(ORIGIN))  
+            self.screen.blit(self.level_playing.background,(ORIGIN))  
             self.draw_score(self.pingu.score)
             self.draw_life(self.pingu.count_life)
 
-            self.pingu.check_collision_floor(self.list_levels[self.index_level].list_platforms)
+            self.pingu.check_collision_floor(self.level_playing.list_platforms)
 
 
     #Impacto de disparo hacia un enemigo:
-            for enemy in self.list_levels[self.index_level].sprite_enemies:
-                for projectile in self.list_levels[self.index_level].sprite_projectiles:
+            for enemy in self.level_playing.sprite_enemies:
+                for projectile in self.level_playing.sprite_projectiles:
                     if projectile.check_objective(enemy):
                         self.pingu.score += 100
                 if enemy.count_life <= 0:
                     enemy.kill()
-                    self.list_levels[self.index_level].all_sprites.remove(enemy)
-                    self.list_levels[self.index_level].sprite_enemies.remove(enemy)
-                    enemy.drop_item(self.list_levels[self.index_level].sprite_items,self.list_levels[self.index_level].all_sprites)
+                    self.level_playing.all_sprites.remove(enemy)
+                    self.level_playing.sprite_enemies.remove(enemy)
+                    enemy.drop_item(self.level_playing.sprite_items,self.level_playing.all_sprites)
 
-            for projectile in self.list_levels[self.index_level].sprite_projectiles_enemies:
+            for projectile in self.level_playing.sprite_projectiles_enemies:
                 if projectile.impacted:
-                    enemy.drop_item(self.list_levels[self.index_level].sprite_items,self.list_levels[self.index_level].all_sprites)
+                    enemy.drop_item(self.level_playing.sprite_items,self.level_playing.all_sprites)
 
     #Impacto con enemigo (muerte)
 
-            for enemy in self.list_levels[self.index_level].sprite_enemies:
+            for enemy in self.level_playing.sprite_enemies:
                 self.pingu.dead(enemy)
-            for projectile_enemy in self.list_levels[self.index_level].sprite_projectiles_enemies:
+            for projectile_enemy in self.level_playing.sprite_projectiles_enemies:
                 self.pingu.dead(projectile_enemy)    
 
             #Ghost:
 
-            if self.list_levels[self.index_level].sprite_enemies_ghost:
-                for ghost in self.list_levels[self.index_level].sprite_enemies_ghost:
+            if self.level_playing.sprite_enemies_ghost:
+                for ghost in self.level_playing.sprite_enemies_ghost:
                     if ghost.count_life > 0:
                         if ghost.see_objective(self.pingu):
                             if ghost.is_looking == "derecha":
                                 if ghost.rect.right < self.pingu.rect.left:
                                     ghost.shoot_projectile(
                                     ghost.rect.x+10,ghost.rect.y+10,ghost.is_looking,
-                                    self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
+                                    self.level_playing.sprite_projectiles_enemies,self.level_playing.all_sprites)
                             elif ghost.is_looking == "izquierda":
                                 if ghost.rect.left > self.pingu.rect.right:
                                     ghost.shoot_projectile(
                                     ghost.rect.x+10,ghost.rect.y+10,
-                                    ghost.is_looking,self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)                    
+                                    ghost.is_looking,self.level_playing.sprite_projectiles_enemies,self.level_playing.all_sprites)                    
                         else:
                             ghost.is_doing = "camina"
 
             #Wolf
 
-            for wolf in self.list_levels[self.index_level].sprite_enemies_wolf:
-                wolf.check_collision_floor(self.list_levels[self.index_level].list_platforms)
+            for wolf in self.level_playing.sprite_enemies_wolf:
+                wolf.check_collision_floor(self.level_playing.list_platforms)
 
                 if wolf.count_life > 0:
                     if wolf.see_objective(self.pingu):
@@ -290,26 +324,26 @@ class Game:
                         wolf.speed = SPEED_WOLF
 
     #BOSS     
-            if self.list_levels[self.index_level].have_boss and self.list_levels[self.index_level].boss.count_life > 0:
+            if self.level_playing.have_boss and self.level_playing.boss.count_life > 0:
 
-                self.list_levels[self.index_level].boss.attack_ice(self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
-                self.list_levels[self.index_level].boss.attack_water(self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
-                self.list_levels[self.index_level].boss.attack_fire(
-                self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites)
-                self.list_levels[self.index_level].boss.dash()
+                self.level_playing.boss.attack_ice(self.level_playing.sprite_projectiles_enemies,self.level_playing.all_sprites)
+                self.level_playing.boss.attack_water(self.level_playing.sprite_projectiles_enemies,self.level_playing.all_sprites)
+                self.level_playing.boss.attack_fire(
+                self.level_playing.sprite_projectiles_enemies,self.level_playing.all_sprites)
+                self.level_playing.boss.dash()
 
-                if self.list_levels[self.index_level].boss.see_objective(self.pingu):
-                    self.list_levels[self.index_level].boss.attack_one_fire(
-                    self.list_levels[self.index_level].sprite_projectiles_enemies,self.list_levels[self.index_level].all_sprites,
-                    (self.list_levels[self.index_level].boss.rect_ojos.x,self.list_levels[self.index_level].boss.rect_ojos.y))
+                if self.level_playing.boss.see_objective(self.pingu):
+                    self.level_playing.boss.attack_one_fire(
+                    self.level_playing.sprite_projectiles_enemies,self.level_playing.all_sprites,
+                    (self.level_playing.boss.rect_ojos.x,self.level_playing.boss.rect_ojos.y))
     
     #Item
 
-            for item in self.list_levels[self.index_level].sprite_items:
+            for item in self.level_playing.sprite_items:
                 item.buff(self.pingu)
 
-            self.list_levels[self.index_level].all_sprites.update()
-            self.list_levels[self.index_level].all_sprites.draw(self.screen)
+            self.level_playing.all_sprites.update()
+            self.level_playing.all_sprites.draw(self.screen)
 
             if self.pingu.count_life <= 0 or self.index_level > len(self.list_levels):
                 time.sleep(1)
@@ -319,18 +353,20 @@ class Game:
             if get_mode():
                 self.screen.fill("Blue",self.pingu.rect_pies)
 
-                for platform in self.list_levels[self.index_level].sprite_platforms:
+                for platform in self.level_playing.sprite_platforms:
                     self.screen.fill("Yellow",platform.floor_collision)
 
-                if self.list_levels[self.index_level].sprite_enemies:
-                    for enemy in self.list_levels[self.index_level].sprite_enemies:
+                if self.level_playing.sprite_enemies:
+                    for enemy in self.level_playing.sprite_enemies:
                         self.screen.fill ("Red",enemy.rect_pies)
                         self.screen.fill("Green",enemy.rect_ojos)
 
             self.win_level()
             pygame.display.flip()
         else:
-            self.show_screen_game_over()
+            self.win_game()
+            self.win_all = True
+            pygame.display.flip()
 
 #---------------------------------------------------------
     def play_music (self,sound):
@@ -359,3 +395,26 @@ class Game:
             self.pingu.is_doing = "dispara"              
         else:
             self.pingu.is_doing = "quieto"     
+
+    def show_main_menu (self):
+        if self.menu_state =="main":
+            self.screen.blit(self.menu.background_main,ORIGIN)
+            if self.menu.start.draw(self.screen):
+                self.reset()
+                self.menu_state = "playing"
+
+            if self.menu.quit.draw(self.screen):
+                self.exit()
+            pygame.display.flip()
+
+    def win_game(self):
+        if not self.game_over_music:
+            pygame.mixer.music.stop()  
+            pygame.mixer.music.load(rf"assets\sounds\menu\pause_ysa.mp3")  
+            pygame.mixer.music.play(-1) 
+            self.game_over_music = True
+
+        self.screen.blit(self.menu.background_main,ORIGIN)
+        self.menu.draw_text("FELICIDADES HAS GANADO EL JUEGO","Blue",self.screen,(500,CENTER_Y))
+        if self.menu.back.draw(self.screen):
+            self.menu_state = "main"

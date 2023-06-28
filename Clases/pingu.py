@@ -252,14 +252,9 @@ class Pingu (pygame.sprite.Sprite):
                 self.movement_y = 0
                 self.is_jumping = False
                 self.is_in_floor = True
-                # self.is_falling = False
         else:
             self.is_falling = True  # Si no hay colisión, permitir que caiga
-        # if not flag and self.is_in_floor:
-        #     self.is_in_floor = False
-            # self.bajar_plataforma = False
-            # self.is_falling = True 
-            print ("entro")
+
 
 #Disparar
 
@@ -292,6 +287,17 @@ class Pingu (pygame.sprite.Sprite):
             self.time_reload = SPEED_SHOOT_RELOAD
             self.speed_animation = SPEED_ANIMATION
         
+    def restart (self):
+        self.rect.x = self.pos_respaw[0]
+        self.rect.y = self.pos_respaw[1]
+        self.rect_pies.x = self.pos_respaw[0]
+        self.rect_pies.y = self.rect.bottom 
+        self.count_life = COUNT_LIFE_PINGU
+        self.speed_animation = SPEED_ANIMATION
+        self.speed = SPEED_MAIN_CHARACTER
+        self.time_reload = SPEED_SHOOT_RELOAD
+        self.score = 0
+
     def play_sound(self,path):
         sound = pygame.mixer.Sound(path)
         sound.play()

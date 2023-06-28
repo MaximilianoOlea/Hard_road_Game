@@ -21,31 +21,26 @@ class Level (pygame.sprite.Sprite):
         self.time = 0
         self.key_win = False
         self.is_level = 1
-
         # if self.key_win
 #Sprites
         self.all_sprites = pygame.sprite.Group()
-
-        #self.pingu = Pingu((main_character_x,main_character_y))
-        #self.all_sprites.add(self.pingu)
-
         self.sprite_platforms = pygame.sprite.Group()
         self.sprite_enemies = pygame.sprite.Group()
         self.sprite_enemies_wolf = pygame.sprite.Group()
         self.sprite_enemies_ghost = pygame.sprite.Group()
-
         self.sprite_projectiles = pygame.sprite.Group()
         self.sprite_projectiles_enemies = pygame.sprite.Group()
         self.sprite_items = pygame.sprite.Group()
 
         self.have_boss = False
-    
         self.list_platforms = []
         self.fuente = pygame.font.Font(rf"assets\fonts\gameplay.ttf",48)
 
         self.background = pygame.image.load(background).convert()
         self.background = pygame.transform.scale(self.background, (WIDTH, HEIGHT))
         self.music = music
+        
+        self.restart_state = False
 
     def win (self):
         if not self.sprite_enemies: #Si se eliminaron todos, gana
@@ -56,13 +51,31 @@ class Level (pygame.sprite.Sprite):
     def create_platform(self,position:tuple,size:tuple):
         platform = Platform(rf"assets\items\platforms\ice.png",position,size)
         return platform
-    
 
+
+    def remove_sprites (self):
+        self.all_sprites.empty()
+        self.sprite_platforms.empty()
+        self.sprite_enemies.empty()
+        self.sprite_enemies_wolf.empty()
+        self.sprite_enemies_ghost.empty()
+        self.sprite_projectiles.empty()
+        self.sprite_projectiles_enemies.empty()
+        self.sprite_items.empty()
+
+        
 class Level1 (Level):
     def __init__(self):
         super().__init__(1,rf"assets\backgrounds\garden.png",rf"assets\sounds\level\ademas_de_mi.mp3") 
         self.list_platforms = self.create_list_platforms()
         self.create_enemies()
+
+    def restart (self):
+
+        self.remove_sprites()
+        self.list_platforms = self.create_list_platforms()
+        self.create_enemies()
+
 
     def create_enemies(self):
         #Bird (3)
@@ -122,7 +135,13 @@ class Level2 (Level):
         super().__init__(2,rf"assets\backgrounds\grass.png",rf"assets\sounds\level\level2_paulo.mp3") 
         self.list_platforms = self.create_list_platforms()
         self.create_enemies()
-        
+
+
+    def restart (self):
+        self.remove_sprites()
+        self.list_platforms = self.create_list_platforms()
+        self.create_enemies()
+
     def create_enemies(self):
         #Wolf (3)
         a_enemy = Wolf ((100,170)) #Top
@@ -188,6 +207,18 @@ class Level3 (Level):
         self.boss = Boss((random.randint(0,300),HEIGHT-270))
         self.all_sprites.add(self.boss)   
         self.sprite_enemies.add(self.boss)
+
+
+
+    def restart (self):
+        #if not self.restart_state:
+            self.restart_state = True
+            self.remove_sprites()
+            self.list_platforms = self.create_list_platforms()
+            self.boss = Boss((random.randint(0,300),HEIGHT-270))
+            self.all_sprites.add(self.boss)   
+            self.sprite_enemies.add(self.boss)
+            self.restart_state = False
 
     def create_list_platforms(self):
 

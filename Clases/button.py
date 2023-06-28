@@ -13,13 +13,17 @@ class Button ():
     def draw(self,surface): 
         surface.blit(self.image,(self.rect.x,self.rect.y))
 
-
         action = False
         pos_mouse = pygame.mouse.get_pos()
 
         if self.rect.collidepoint(pos_mouse):
-            if pygame.mouse_get_pressed()[0] == 1 and self.clicked == False:
+            #Click izquierdo
+            if pygame.mouse.get_pressed()[0] == 1 and self.clicked == False: 
                 self.clicked = True
                 action = True
+                print ("Clickeo")
+
         if pygame.mouse.get_pressed()[0] == 0:
             self.clicked = False
+
+        return action

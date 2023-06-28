@@ -8,24 +8,18 @@ class Menu ():
         self.font = pygame.font.Font(rf"assets\fonts\gameplay.ttf",40)
         self.background = pygame.image.load(rf"assets\backgrounds\bosque2.jpg")
         self.background = pygame.transform.scale(self.background,(SIZE_SCREEN)) 
-
-        self.menu_pause = pygame.image.load(rf"assets\menu\imagen_pausa.png")
-        self.menu_pause = pygame.transform.scale(self.menu_pause,(500,700)) 
-        self.rect_menu_pause = self.menu_pause.get_rect()
-        # self.rect_menu_pause.x = 400
-
-        self.start = Button((400,400),rf"assets\buttons\start.png",(200,100))
-        self.exit = Button((400,400),rf"assets\buttons\exit.png",(150,50))
-        self.restart = Button((400,400),rf"assets\buttons\restart.png",(150,50))
-        self.reanude = Button((400,400),rf"assets\buttons\quitar_pausa.png",(150,50))
-
+    #Main
+        self.start = Button((850,320),rf"assets\buttons\start.png",(150,80))
+        self.quit = Button((850,420),rf"assets\buttons\exit.png",(150,50))
+        self.background_main = pygame.image.load(rf"assets\backgrounds\Bosque.jpg")
+    #Pause
+        self.reanude = Button((850,400),rf"assets\buttons\quitar_pausa.png",(150,50))
+        self.restart = Button((850,500),rf"assets\buttons\restart.png",(150,50))
+        self.exit = Button((850,600),rf"assets\buttons\exit.png",(150,50))
+        
+    #WIN:
+        self.back = Button((850,600),rf"assets\buttons\back.png",(150,50))
     def draw_text(self,text,color,screen,position):
         image = self.font.render(text,True,color)
-
-        screen.blit(self.background,(0,0))
-        # screen.blit(self.menu_pause,(position))
-        screen.blit(self.start.image,position)
-        screen.blit(self.exit.image,(300,300))
-
-        #screen.blit(image,(position))
+        screen.blit(image,(position))
 
